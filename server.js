@@ -216,12 +216,18 @@ User question: ${message}`;
 });
 
 // URL scanning
+// URL scanning
 app.post("/api/scan/url", async (req, res) => {
   try {
-    const { url } = req.body;
+    let { url } = req.body; // Only declare once
 
     if (!url) {
       return res.status(400).json({ error: "URL is required" });
+    }
+
+    // Auto-add https:// if no protocol is specified
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
     }
 
     console.log(`🔍 Scanning URL with Gemini AI: ${url}`);
