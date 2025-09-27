@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSecure - Statement Analyzer</title>
+    <link rel="stylesheet" href="../css/statement-analyzer.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>FinSecure</span>
+        </div>
+        
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search anything..." id="global-search">
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="nav-item" id="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="nav-item" id="messages">
+                <i class="fas fa-envelope"></i>
+                <span class="notification-badge">2</span>
+            </div>
+            <div class="nav-item profile-dropdown">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" class="profile-img">
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="ai-advisor.html" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Personal Advisor</span>
+            </a>
+            <a href="statement-analyzer.html" class="nav-link active">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Statement Analyzer</span>
+            </a>
+            <a href="fraud-scanner.html" class="nav-link">
+                <i class="fas fa-shield-virus"></i>
+                <span>Fraud Scanner</span>
+            </a>
+            <a href="security-center.html" class="nav-link">
+                <i class="fas fa-lock"></i>
+                <span>Security Center</span>
+            </a>
+            <a href="education.html" class="nav-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education Hub</span>
+            </a>
+            <a href="life-simulator.html" class="nav-link">
+                <i class="fas fa-gamepad"></i>
+                <span>Life Simulator</span>
+            </a>
+            <a href="challenges.html" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                <span>Challenges</span>
+            </a>
+            <a href="portfolio.html" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Portfolio</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="content-section active">
+            <div class="section-header">
+                <h1>Bank Statement Analyzer</h1>
+                <p>Upload your bank statement PDF or photo to get AI-powered financial insights</p>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="analyzer-upload-section" id="analyzerUploadSection">
+                <div class="upload-methods">
+                    <div class="upload-method" id="analyzerPdfUpload">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h3>PDF Statement</h3>
+                        <p>Upload your bank statement PDF file</p>
+                        <input type="file" class="file-input" id="analyzerPdfInput" accept=".pdf">
+                    </div>
+                    
+                    <div class="upload-method" id="analyzerImageUpload">
+                        <div class="upload-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h3>Photo/Screenshot</h3>
+                        <p>Upload image of your statement</p>
+                        <input type="file" class="file-input" id="analyzerImageInput" accept="image/*">
+                    </div>
+
+                    <div class="upload-method" id="analyzerCameraCapture">
+                        <div class="upload-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <h3>Take Photo</h3>
+                        <p>Use camera to capture statement</p>
+                        <input type="file" class="file-input" id="analyzerCameraInput" accept="image/*" capture="environment">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Section -->
+            <div class="analyzer-processing-section" id="analyzerProcessingSection">
+                <h2>Processing Your Statement</h2>
+                <div class="progress-container">
+                    <div class="loading-spinner"></div>
+                    <div class="progress-bar">
+                        <div class="progress" id="analyzerProgressBar"></div>
+                    </div>
+                    <div class="progress-text" id="analyzerProgressText">Initializing...</div>
+                </div>
+            </div>
+
+            <!-- Analysis Results Section -->
+            <div class="analyzer-results" id="analyzerResults">
+                <!-- Summary Dashboard -->
+                <div class="financial-summary">
+                    <h2>Financial Overview</h2>
+                    <div class="summary-cards" id="summaryCards">
+                        <!-- Dynamic summary cards -->
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Spending Categories</h3>
+                        <canvas id="categoryChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Monthly Trends</h3>
+                        <canvas id="trendsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="detailed-analysis">
+                    <div class="analysis-card">
+                        <h3>Category Breakdown</h3>
+                        <div id="categoryDetails"></div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>AI Recommendations</h3>
+                        <div id="aiRecommendations"></div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>Financial Insights</h3>
+                        <div id="financialInsights"></div>
+                    </div>
+                </div>
+
+                <!-- Chat with AI about your finances -->
+                <div class="financial-chat">
+                    <h3>Ask About Your Finances</h3>
+                    <div class="chat-messages" id="financialChatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="financialChatInput" placeholder="Ask about your spending patterns...">
+                        <button id="sendFinancialMessage"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+
+                <button class="btn reset-btn" onclick="resetStatementAnalyzer()">Analyze Another Statement</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Widget (Floating) -->
+    <div class="ai-widget-floating" id="ai-widget">
+        <div class="ai-widget-header">
+            <i class="fas fa-robot"></i>
+            <span>Financial Assistant</span>
+            <button class="widget-close" id="close-ai-widget">×</button>
+        </div>
+        <div class="ai-widget-content">
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message">
+                    <p>Hi! I'm your Personal assistant. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask me anything...">
+                <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for AI Widget -->
+    <button class="ai-fab" id="ai-fab">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <script src="../js/statement-analyzer.js"></script>
+</body>
+</html>

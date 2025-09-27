@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Education Hub - FinSecure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/education.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>FinSecure</span>
+        </div>
+        
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="global-search" placeholder="Search courses, topics, resources...">
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="nav-item" id="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="nav-item" id="messages">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="nav-item profile-dropdown">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&facepad=2" alt="Profile" class="profile-img">
+                <span>John Doe</span>
+                <div class="dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="ai-advisor.html" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Personal Advisor</span>
+            </a>
+            <a href="statement-analyzer.html" class="nav-link">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Statement Analyzer</span>
+            </a>
+            <a href="fraud-scanner.html" class="nav-link">
+                <i class="fas fa-shield-virus"></i>
+                <span>Fraud Scanner</span>
+            </a>
+            <a href="security-center.html" class="nav-link">
+                <i class="fas fa-lock"></i>
+                <span>Security Center</span>
+            </a>
+            <a href="education.html" class="nav-link active">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education Hub</span>
+            </a>
+            <a href="life-simulator.html" class="nav-link">
+                <i class="fas fa-gamepad"></i>
+                <span>Life Simulator</span>
+            </a>
+            <a href="challenges.html" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                <span>Challenges</span>
+            </a>
+            <a href="portfolio.html" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Portfolio</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section id="education" class="content-section active">
+            <div class="section-header">
+                <h1>Education Hub</h1>
+                <p>Learn about financial literacy, cybersecurity, and investment strategies</p>
+            </div>
+
+            <!-- Education Tabs -->
+            <div class="education-tabs">
+                <button class="tab-btn active" data-tab="courses">Courses</button>
+                <button class="tab-btn" data-tab="articles">Articles</button>
+                <button class="tab-btn" data-tab="videos">Videos</button>
+                <button class="tab-btn" data-tab="webinars">Webinars</button>
+            </div>
+
+            <!-- Courses Tab -->
+            <div id="courses-tab" class="tab-content">
+                <div class="course-grid">
+                    <!-- Course 1 -->
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Cybersecurity Fundamentals</h3>
+                            <p>Learn how to protect your financial accounts from hackers and phishing attacks</p>
+                            <div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 75%"></div>
+                                </div>
+                                <span>75% Complete</span>
+                            </div>
+                            <button class="course-btn">Continue Learning</button>
+                        </div>
+                    </div>
+
+                    <!-- Course 2 -->
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Investment Basics</h3>
+                            <p>Understand stocks, bonds, and mutual funds for beginners</p>
+                            <div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 30%"></div>
+                                </div>
+                                <span>30% Complete</span>
+                            </div>
+                            <button class="course-btn">Continue Learning</button>
+                        </div>
+                    </div>
+
+                    <!-- Course 3 -->
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Budgeting & Saving</h3>
+                            <p>Create a budget that works and build your emergency fund</p>
+                            <div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 10%"></div>
+                                </div>
+                                <span>10% Complete</span>
+                            </div>
+                            <button class="course-btn">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <!-- Course 4 -->
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Fraud Prevention</h3>
+                            <p>Identify and avoid common financial scams and fraud techniques</p>
+                            <div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 0%"></div>
+                                </div>
+                                <span>Not Started</span>
+                            </div>
+                            <button class="course-btn">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <!-- Course 5 -->
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Credit Management</h3>
+                            <p>Improve your credit score and manage debt effectively</p>
+                            <div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 100%"></div>
+                                </div>
+                                <span>Completed</span>
+                            </div>
+                            <button class="course-btn completed">View Certificate</button>
+                        </div>
+                    </div>
+
+                    <!-- Course 6 -->
+                    <div class="course-card">
+                        <div class="course-image">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Home Ownership</h3>
+                            <p>Navigate mortgages, insurance, and home maintenance costs</p>
+                            <div class="course-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 50%"></div>
+                                </div>
+                                <span>50% Complete</span>
+                            </div>
+                            <button class="course-btn">Continue Learning</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Tab -->
+            <div id="articles-tab" class="tab-content hidden">
+                <div class="course-grid">
+                    <!-- Article 1 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>5 Signs of Phishing Emails</h3>
+                            <p>Learn to identify suspicious emails that could compromise your financial security</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 8 min read</span>
+                                <span><i class="fas fa-calendar"></i> Published: Oct 15, 2023</span>
+                            </div>
+                            <button class="course-btn">Read Article</button>
+                        </div>
+                    </div>
+
+                    <!-- Article 2 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Emergency Fund Calculator</h3>
+                            <p>How much should you really save for emergencies?</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 12 min read</span>
+                                <span><i class="fas fa-calendar"></i> Published: Sep 28, 2023</span>
+                            </div>
+                            <button class="course-btn">Read Article</button>
+                        </div>
+                    </div>
+
+                    <!-- Article 3 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Understanding Cryptocurrency Risks</h3>
+                            <p>A balanced look at the opportunities and dangers of digital currencies</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 15 min read</span>
+                                <span><i class="fas fa-calendar"></i> Published: Nov 2, 2023</span>
+                            </div>
+                            <button class="course-btn">Read Article</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Videos Tab -->
+            <div id="videos-tab" class="tab-content hidden">
+                <div class="course-grid">
+                    <!-- Video 1 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Two-Factor Authentication Explained</h3>
+                            <p>Watch how 2FA can protect your accounts from unauthorized access</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 6:45 min</span>
+                                <span><i class="fas fa-eye"></i> 12.5K views</span>
+                            </div>
+                            <button class="course-btn">Watch Video</button>
+                        </div>
+                    </div>
+
+                    <!-- Video 2 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Budgeting for Beginners</h3>
+                            <p>Step-by-step guide to creating your first budget</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 12:20 min</span>
+                                <span><i class="fas fa-eye"></i> 8.7K views</span>
+                            </div>
+                            <button class="course-btn">Watch Video</button>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Investment Portfolio Diversification</h3>
+                            <p>Why putting all your eggs in one basket is risky</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-clock"></i> 18:30 min</span>
+                                <span><i class="fas fa-eye"></i> 15.2K views</span>
+                            </div>
+                            <button class="course-btn">Watch Video</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webinars Tab -->
+            <div id="webinars-tab" class="tab-content hidden">
+                <div class="course-grid">
+                    <!-- Webinar 1 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Live Q&A: Financial Security in 2024</h3>
+                            <p>Join our experts for a live discussion on emerging threats</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-calendar"></i> Dec 15, 2023</span>
+                                <span><i class="fas fa-clock"></i> 2:00 PM EST</span>
+                            </div>
+                            <button class="course-btn">Register Now</button>
+                        </div>
+                    </div>
+
+                    <!-- Webinar 2 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #84cc16, #65a30d);">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Retirement Planning Workshop</h3>
+                            <p>Strategies for building a secure retirement at any age</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-calendar"></i> Jan 10, 2024</span>
+                                <span><i class="fas fa-clock"></i> 6:30 PM EST</span>
+                            </div>
+                            <button class="course-btn">Register Now</button>
+                        </div>
+                    </div>
+
+                    <!-- Webinar 3 -->
+                    <div class="course-card">
+                        <div class="course-image" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Tax Optimization Strategies</h3>
+                            <p>Legal ways to minimize your tax burden</p>
+                            <div class="course-meta">
+                                <span><i class="fas fa-calendar"></i> Feb 5, 2024</span>
+                                <span><i class="fas fa-clock"></i> 1:00 PM EST</span>
+                            </div>
+                            <button class="course-btn">Register Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating AI Widget -->
+    <div class="ai-widget-floating" id="ai-widget">
+        <div class="ai-widget-header">
+            <div>
+                <i class="fas fa-robot"></i>
+                <span>Learning Assistant</span>
+            </div>
+            <button class="widget-close" id="close-ai-widget">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="ai-widget-content">
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message">
+                    <p>Hi! I'm here to help with your financial education. What topic would you like to learn about today?</p>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask about cybersecurity, investing, budgeting...">
+                <button id="send-ai-message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="ai-fab" id="ai-fab">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <script src="../js/education.js"></script>
+</body>
+</html>

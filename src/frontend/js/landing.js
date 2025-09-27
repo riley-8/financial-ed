@@ -41,7 +41,7 @@ class LandingPage {
         const startLearningBtn = document.getElementById('start-learning');
         if (startLearningBtn) {
             startLearningBtn.addEventListener('click', () => {
-                window.location.href = '/dashboard';
+                window.location.href = 'dashboard.html';
             });
         }
 
@@ -57,7 +57,7 @@ class LandingPage {
         const joinNowBtn = document.getElementById('join-now');
         if (joinNowBtn) {
             joinNowBtn.addEventListener('click', () => {
-                window.location.href = '/dashboard';
+                window.location.href = 'dashboard.html';
             });
         }
 
@@ -65,7 +65,7 @@ class LandingPage {
         const ctaBtn = document.querySelector('.cta-btn');
         if (ctaBtn) {
             ctaBtn.addEventListener('click', () => {
-                window.location.href = '/dashboard';
+                window.location.href = 'dashboard.html';
             });
         }
 

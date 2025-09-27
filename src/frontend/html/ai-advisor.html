@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Advisor - FinSecure</title>
+    <link rel="stylesheet" href="../css/personal-advisor.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>FinSecure</span>
+        </div>
+        
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search anything..." id="global-search">
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="nav-item" id="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="nav-item" id="messages">
+                <i class="fas fa-envelope"></i>
+                <span class="notification-badge">2</span>
+            </div>
+            <div class="nav-item profile-dropdown">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" class="profile-img">
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#ai-advisor" class="nav-link active">
+                <i class="fas fa-robot"></i>
+                <span>Personal Advisor</span>
+            </a>
+            <a href="statement-analyzer.html" class="nav-link">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Statement Analyzer</span>
+            </a>
+            <a href="fraud-scanner.html" class="nav-link">
+                <i class="fas fa-shield-virus"></i>
+                <span>Fraud Scanner</span>
+            </a>
+            <a href="security-center.html" class="nav-link">
+                <i class="fas fa-lock"></i>
+                <span>Security Center</span>
+            </a>
+            <a href="education.html" class="nav-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education Hub</span>
+            </a>
+            <a href="life-simulator.html" class="nav-link">
+                <i class="fas fa-gamepad"></i>
+                <span>Life Simulator</span>
+            </a>
+            <a href="challenges.html" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                <span>Challenges</span>
+            </a>
+            <a href="portfolio.html" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Portfolio</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- AI Advisor Section -->
+        <section id="ai-advisor" class="content-section active">
+            <div class="section-header">
+                <h1>Personal Financial Advisor</h1>
+                <p>Get personalized financial advice powered by AI</p>
+            </div>
+
+            <div class="ai-chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message ai-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>Hello! I'm your Personal financial advisor. I can help you with:</p>
+                            <ul>
+                                <li>Investment advice and portfolio optimization</li>
+                                <li>Budget planning and financial goal setting</li>
+                                <li>Fraud detection and security recommendations</li>
+                                <li>Financial education and literacy</li>
+                                <li>Risk assessment and management</li>
+                            </ul>
+                            <p>What would you like to discuss today?</p>
+                        </div>
+                        <div class="message-timestamp">
+                            Just now
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Ask me anything about finance or security...">
+                    <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="quick-actions">
+                    <button class="quick-action" data-message="How should I invest R10,000 for medium-term growth?">
+                        <i class="fas fa-chart-line"></i>
+                        Investment Advice
+                    </button>
+                    <button class="quick-action" data-message="Help me create a monthly budget for my income">
+                        <i class="fas fa-calculator"></i>
+                        Budget Planning
+                    </button>
+                    <button class="quick-action" data-message="What are the latest phishing scams I should know about?">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Tips
+                    </button>
+                    <button class="quick-action" data-message="Explain compound interest and how it works">
+                        <i class="fas fa-graduation-cap"></i>
+                        Financial Education
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Features Grid -->
+            <div class="ai-features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Smart Analysis</h3>
+                    <p>AI-powered analysis of your financial situation with personalized recommendations</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3>Security Focused</h3>
+                    <p>Real-time fraud detection and security best practices tailored to your needs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Portfolio Insights</h3>
+                    <p>Detailed investment analysis and optimization suggestions based on your goals</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>Learning Resources</h3>
+                    <p>Access to educational content and interactive learning modules</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Widget (Floating) -->
+    <div class="ai-widget-floating" id="ai-widget">
+        <div class="ai-widget-header">
+            <i class="fas fa-robot"></i>
+            <span>Financial Assistant</span>
+            <button class="widget-close" id="close-ai-widget">×</button>
+        </div>
+        <div class="ai-widget-content">
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message">
+                    <p>Hi! I'm your quick assistant. How can I help you?</p>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask me anything...">
+                <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for AI Widget -->
+    <button class="ai-fab" id="ai-fab">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <script src="../js/personal-advisor.js"></script>
+</body>
+</html>
