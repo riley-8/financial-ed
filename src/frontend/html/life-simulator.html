@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Life Simulator - FinSecure</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/life-simulator.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>FinSecure</span>
+        </div>
+        
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search anything..." id="global-search">
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="nav-item" id="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="nav-item" id="messages">
+                <i class="fas fa-envelope"></i>
+                <span class="notification-badge">2</span>
+            </div>
+            <div class="nav-item profile-dropdown">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" class="profile-img">
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="ai-advisor.html" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Personal Advisor</span>
+            </a>
+            <a href="statement-analyzer.html" class="nav-link">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Statement Analyzer</span>
+            </a>
+            <a href="fraud-scanner.html" class="nav-link">
+                <i class="fas fa-shield-virus"></i>
+                <span>Fraud Scanner</span>
+            </a>
+            <a href="security-center.html" class="nav-link">
+                <i class="fas fa-lock"></i>
+                <span>Security Center</span>
+            </a>
+            <a href="education.html" class="nav-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education Hub</span>
+            </a>
+            <a href="life-simulator.html" class="nav-link active">
+                <i class="fas fa-gamepad"></i>
+                <span>Life Simulator</span>
+            </a>
+            <a href="challenges.html" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                <span>Challenges</span>
+            </a>
+            <a href="portfolio.html" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Portfolio</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Life Simulator Section -->
+        <section id="life-simulator" class="content-section active">
+            <div class="section-header">
+                <h1>Financial Life Simulator</h1>
+                <p>Practice real-world financial and security decisions in a safe environment</p>
+            </div>
+
+            <!-- Game Stats -->
+            <div class="simulator-stats">
+                <div class="stat-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Balance: R<span id="sim-balance">50,000</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Age: <span id="sim-age">25</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-heart"></i>
+                    <span>Health: <span id="sim-health">100</span>%</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-shield"></i>
+                    <span>Security: <span id="sim-security">85</span>%</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Knowledge: <span id="sim-knowledge">75</span>%</span>
+                </div>
+            </div>
+
+            <!-- Current Scenario -->
+            <div class="scenario-container">
+                <div class="scenario-header">
+                    <h3 id="scenario-title">Investment Opportunity</h3>
+                    <div class="scenario-difficulty">
+                        <span class="difficulty-badge medium">Medium</span>
+                    </div>
+                </div>
+                <div class="scenario-card">
+                    <p id="scenario-description">A friend recommends investing in a new cryptocurrency. The potential returns are high, but so are the risks. What do you do?</p>
+                    
+                    <div class="scenario-options" id="scenario-options">
+                        <button class="option-btn" data-choice="invest">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Invest 20% of savings</span>
+                        </button>
+                        <button class="option-btn" data-choice="research">
+                            <i class="fas fa-search"></i>
+                            <span>Research first</span>
+                        </button>
+                        <button class="option-btn" data-choice="decline">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Decline the offer</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decision History -->
+            <div class="history-container">
+                <h3>Decision History</h3>
+                <div class="history-list" id="history-list">
+                    <!-- Decision history will be populated here -->
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="achievements-container">
+                <h3>Achievements</h3>
+                <div class="achievements-grid">
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="achievement-info">
+                            <h4>Financial Guru</h4>
+                            <p>Make 10 correct financial decisions</p>
+                        </div>
+                    </div>
+                    <div class="achievement-card unlocked">
+                        <div class="achievement-icon">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="achievement-info">
+                            <h4>Security Expert</h4>
+                            <p>Avoid 5 security threats</p>
+                        </div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="achievement-info">
+                            <h4>Savings Master</h4>
+                            <p>Reach R100,000 in savings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-container">
+                <button class="quick-action-btn" id="reset-game">
+                    <i class="fas fa-redo"></i>
+                    Reset Game
+                </button>
+                <button class="quick-action-btn" id="save-game">
+                    <i class="fas fa-save"></i>
+                    Save Progress
+                </button>
+                <button class="quick-action-btn" id="hint-btn">
+                    <i class="fas fa-lightbulb"></i>
+                    Get Hint
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Widget (Floating) -->
+    <div class="ai-widget-floating" id="ai-widget">
+        <div class="ai-widget-header">
+            <i class="fas fa-robot"></i>
+            <span>Simulation Coach</span>
+            <button class="widget-close" id="close-ai-widget">×</button>
+        </div>
+        <div class="ai-widget-content">
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message">
+                    <p>Welcome to the Financial Life Simulator! I'll guide you through realistic financial scenarios.</p>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask about this scenario...">
+                <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for AI Widget -->
+    <button class="ai-fab" id="ai-fab">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <script src="../js/life-simulator.js"></script>
+</body>
+</html>

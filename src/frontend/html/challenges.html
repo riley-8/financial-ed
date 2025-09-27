@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenges - FinSecure</title>
+    <link rel="stylesheet" href="../css/challenges.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>FinSecure</span>
+        </div>
+        
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search challenges..." id="global-search">
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="nav-item" id="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="nav-item" id="messages">
+                <i class="fas fa-envelope"></i>
+                <span class="notification-badge">2</span>
+            </div>
+            <div class="nav-item profile-dropdown">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" class="profile-img">
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="ai-advisor.html" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Personal Advisor</span>
+            </a>
+            <a href="statement-analyzer.html" class="nav-link">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Statement Analyzer</span>
+            </a>
+            <a href="fraud-scanner.html" class="nav-link">
+                <i class="fas fa-shield-virus"></i>
+                <span>Fraud Scanner</span>
+            </a>
+            <a href="security-center.html" class="nav-link">
+                <i class="fas fa-lock"></i>
+                <span>Security Center</span>
+            </a>
+            <a href="education.html" class="nav-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education Hub</span>
+            </a>
+            <a href="life-simulator.html" class="nav-link">
+                <i class="fas fa-gamepad"></i>
+                <span>Life Simulator</span>
+            </a>
+            <a href="challenges.html" class="nav-link active">
+                <i class="fas fa-trophy"></i>
+                <span>Challenges</span>
+            </a>
+            <a href="portfolio.html" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Portfolio</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="content-section active">
+            <div class="section-header">
+                <h1>Gamified Challenges</h1>
+                <p>Complete challenges to earn badges, XP, and improve your financial skills</p>
+            </div>
+
+            <!-- User Stats Overview -->
+            <div class="user-stats-overview">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>1,250</h3>
+                        <p>Total XP</p>
+                        <span class="stat-change positive">+150 this week</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>8</h3>
+                        <p>Badges Earned</p>
+                        <span class="stat-change positive">+2 this month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>15</h3>
+                        <p>Challenges Completed</p>
+                        <span class="stat-change positive">67% success rate</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>7</h3>
+                        <p>Day Streak</p>
+                        <span class="stat-change positive">Keep going!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge Categories -->
+            <div class="challenge-categories">
+                <button class="category-btn active" data-category="all">All Challenges</button>
+                <button class="category-btn" data-category="finance">Finance</button>
+                <button class="category-btn" data-category="security">Security</button>
+                <button class="category-btn" data-category="daily">Daily</button>
+                <button class="category-btn" data-category="weekly">Weekly</button>
+                <button class="category-btn" data-category="achievements">Achievements</button>
+            </div>
+
+            <!-- Challenges Grid -->
+            <div class="challenges-grid">
+                <!-- Budget Master Challenge -->
+                <div class="challenge-card finance" data-challenge-id="budget-master">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="challenge-badge">Finance</div>
+                    </div>
+                    <h3>Budget Master</h3>
+                    <p>Create and maintain a budget that saves 20% of your income for 3 consecutive months</p>
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 67%"></div>
+                        </div>
+                        <span>2/3 months completed</span>
+                    </div>
+                    <div class="challenge-meta">
+                        <span class="difficulty easy">Easy</span>
+                        <span class="duration">3 months</span>
+                    </div>
+                    <div class="challenge-reward">
+                        <i class="fas fa-trophy"></i>
+                        <span>500 XP + Budget Master Badge</span>
+                    </div>
+                    <button class="challenge-action-btn" data-action="continue">Continue Challenge</button>
+                </div>
+
+                <!-- Security Sentinel Challenge -->
+                <div class="challenge-card security" data-challenge-id="security-sentinel">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="challenge-badge">Security</div>
+                    </div>
+                    <h3>Security Sentinel</h3>
+                    <p>Complete 5 phishing detection exercises with 100% accuracy</p>
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 80%"></div>
+                        </div>
+                        <span>4/5 exercises completed</span>
+                    </div>
+                    <div class="challenge-meta">
+                        <span class="difficulty medium">Medium</span>
+                        <span class="duration">1 week</span>
+                    </div>
+                    <div class="challenge-reward">
+                        <i class="fas fa-trophy"></i>
+                        <span>750 XP + Security Expert Badge</span>
+                    </div>
+                    <button class="challenge-action-btn" data-action="continue">Continue Challenge</button>
+                </div>
+
+                <!-- Daily Knowledge Challenge -->
+                <div class="challenge-card daily" data-challenge-id="daily-knowledge">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="challenge-badge">Daily</div>
+                    </div>
+                    <h3>Daily Knowledge</h3>
+                    <p>Complete one financial lesson every day for a week</p>
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 43%"></div>
+                        </div>
+                        <span>3/7 days completed</span>
+                    </div>
+                    <div class="challenge-meta">
+                        <span class="difficulty easy">Easy</span>
+                        <span class="duration">7 days</span>
+                    </div>
+                    <div class="challenge-reward">
+                        <i class="fas fa-trophy"></i>
+                        <span>200 XP + Consistency Badge</span>
+                    </div>
+                    <button class="challenge-action-btn" data-action="continue">Continue Challenge</button>
+                </div>
+
+                <!-- Investment Guru Challenge -->
+                <div class="challenge-card finance" data-challenge-id="investment-guru">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="challenge-badge">Finance</div>
+                    </div>
+                    <h3>Investment Guru</h3>
+                    <p>Successfully analyze and make 3 profitable investment decisions in the simulator</p>
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 33%"></div>
+                        </div>
+                        <span>1/3 decisions completed</span>
+                    </div>
+                    <div class="challenge-meta">
+                        <span class="difficulty hard">Hard</span>
+                        <span class="duration">1 month</span>
+                    </div>
+                    <div class="challenge-reward">
+                        <i class="fas fa-trophy"></i>
+                        <span>1000 XP + Investment Guru Badge</span>
+                    </div>
+                    <button class="challenge-action-btn" data-action="start">Start Challenge</button>
+                </div>
+
+                <!-- Phishing Pro Challenge -->
+                <div class="challenge-card security" data-challenge-id="phishing-pro">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-fish"></i>
+                        </div>
+                        <div class="challenge-badge">Security</div>
+                    </div>
+                    <h3>Phishing Pro</h3>
+                    <p>Identify and report 10 phishing attempts with 90% accuracy</p>
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 0%"></div>
+                        </div>
+                        <span>0/10 attempts identified</span>
+                    </div>
+                    <div class="challenge-meta">
+                        <span class="difficulty medium">Medium</span>
+                        <span class="duration">2 weeks</span>
+                    </div>
+                    <div class="challenge-reward">
+                        <i class="fas fa-trophy"></i>
+                        <span>600 XP + Phishing Pro Badge</span>
+                    </div>
+                    <button class="challenge-action-btn" data-action="start">Start Challenge</button>
+                </div>
+
+                <!-- Weekly Savings Challenge -->
+                <div class="challenge-card weekly" data-challenge-id="weekly-savings">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="challenge-badge">Weekly</div>
+                    </div>
+                    <h3>Weekly Savings</h3>
+                    <p>Save 15% of your simulated income for 4 consecutive weeks</p>
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: 50%"></div>
+                        </div>
+                        <span>2/4 weeks completed</span>
+                    </div>
+                    <div class="challenge-meta">
+                        <span class="difficulty easy">Easy</span>
+                        <span class="duration">4 weeks</span>
+                    </div>
+                    <div class="challenge-reward">
+                        <i class="fas fa-trophy"></i>
+                        <span>400 XP + Savings Champion Badge</span>
+                    </div>
+                    <button class="challenge-action-btn" data-action="continue">Continue Challenge</button>
+                </div>
+            </div>
+
+            <!-- Badges Collection Section -->
+            <div class="badges-section">
+                <h2>Your Badges Collection</h2>
+                <div class="badges-grid">
+                    <div class="badge-card earned">
+                        <div class="badge-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h4>Quick Learner</h4>
+                        <p>Complete 5 challenges</p>
+                    </div>
+                    <div class="badge-card earned">
+                        <div class="badge-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>Security Novice</h4>
+                        <p>Complete 3 security challenges</p>
+                    </div>
+                    <div class="badge-card earned">
+                        <div class="badge-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>Investment Beginner</h4>
+                        <p>Make first successful investment</p>
+                    </div>
+                    <div class="badge-card locked">
+                        <div class="badge-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h4>Finance Master</h4>
+                        <p>Complete all finance challenges</p>
+                    </div>
+                    <div class="badge-card locked">
+                        <div class="badge-icon">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                        <h4>Cyber Expert</h4>
+                        <p>Complete all security challenges</p>
+                    </div>
+                    <div class="badge-card locked">
+                        <div class="badge-icon">
+                            <i class="fas fa-infinity"></i>
+                        </div>
+                        <h4>Consistency King</h4>
+                        <p>30-day challenge streak</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Section -->
+            <div class="leaderboard-section">
+                <h2>Community Leaderboard</h2>
+                <div class="leaderboard">
+                    <div class="leaderboard-header">
+                        <span>Rank</span>
+                        <span>Player</span>
+                        <span>XP</span>
+                        <span>Badges</span>
+                    </div>
+                    <div class="leaderboard-item you">
+                        <span class="rank">#4</span>
+                        <span class="player">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" alt="You">
+                            <span>You</span>
+                        </span>
+                        <span class="xp">1,250</span>
+                        <span class="badges">8</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="rank">#1</span>
+                        <span class="player">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" alt="Sarah">
+                            <span>Sarah</span>
+                        </span>
+                        <span class="xp">3,450</span>
+                        <span class="badges">15</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="rank">#2</span>
+                        <span class="player">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face" alt="Mike">
+                            <span>Mike</span>
+                        </span>
+                        <span class="xp">2,890</span>
+                        <span class="badges">12</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="rank">#3</span>
+                        <span class="player">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face" alt="Emma">
+                            <span>Emma</span>
+                        </span>
+                        <span class="xp">1,780</span>
+                        <span class="badges">9</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Widget (Floating) -->
+    <div class="ai-widget-floating" id="ai-widget">
+        <div class="ai-widget-header">
+            <i class="fas fa-robot"></i>
+            <span>Challenge Assistant</span>
+            <button class="widget-close" id="close-ai-widget">×</button>
+        </div>
+        <div class="ai-widget-content">
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message">
+                    <p>Ready to tackle some challenges? I can help you strategize!</p>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask about challenges...">
+                <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for AI Widget -->
+    <button class="ai-fab" id="ai-fab">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <script src="../js/challenges.js"></script>
+</body>
+</html>
