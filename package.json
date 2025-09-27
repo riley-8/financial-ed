@@ -1,0 +1,24 @@
+{
+  "name": "financial-ed",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/riley-8/financial-ed.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/riley-8/financial-ed/issues"
+  },
+  "homepage": "https://github.com/riley-8/financial-ed#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
