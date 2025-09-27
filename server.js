@@ -130,7 +130,7 @@ app.post("/api/chat", async (req, res) => {
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-pro",
     });
 
     const systemPrompt = `You are a professional Personal Financial Advisor and Cybersecurity Expert for FinSecure app. 
@@ -235,7 +235,7 @@ app.post("/api/scan/url", async (req, res) => {
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-pro",
     });
 
     const prompt = `You are a cybersecurity expert analyzing URLs for security threats. 
@@ -297,7 +297,7 @@ app.post("/api/scan/message", async (req, res) => {
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-pro",
     });
 
     const prompt = `You are a cybersecurity expert analyzing messages for scams and threats.

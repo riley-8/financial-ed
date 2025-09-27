@@ -77,7 +77,7 @@ function initializeAIWidget() {
     });
     
     // Send AI message
-    function sendMessage() {
+    async function sendMessage() {
         const message = aiInput.value.trim();
         if (message) {
             addAIMessage(message, 'user');
@@ -86,12 +86,16 @@ function initializeAIWidget() {
             // Show typing indicator for floating widget
             showAIWidgetTyping();
             
-            // Simulate AI response
-            setTimeout(() => {
+            try {
+                // Call the actual Gemini API
+                const response = await callGeminiAPI(message, 'AI Widget consultation');
                 removeAIWidgetTyping();
-                const response = generateAIResponse(message);
                 addAIMessage(response, 'ai');
-            }, 1500);
+            } catch (error) {
+                console.error('AI Widget Error:', error);
+                removeAIWidgetTyping();
+                addAIMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.', 'ai');
+            }
         }
     }
     
@@ -191,7 +195,7 @@ function initializeAIChat() {
     });
     
     // Send message function
-    function sendMessage() {
+    async function sendMessage() {
         const message = chatInput.value.trim();
         if (message) {
             addChatMessage(message, 'user');
@@ -200,12 +204,16 @@ function initializeAIChat() {
             // Show typing indicator
             showTypingIndicator();
             
-            // Simulate AI response
-            setTimeout(() => {
+            try {
+                // Call the actual Gemini API
+                const response = await callGeminiAPI(message, 'Personal Financial Advisor consultation');
                 removeTypingIndicator();
-                const response = generateAIResponse(message);
                 addChatMessage(response, 'ai');
-            }, 2000);
+            } catch (error) {
+                console.error('Chat Error:', error);
+                removeTypingIndicator();
+                addChatMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.', 'ai');
+            }
         }
     }
     
@@ -283,92 +291,70 @@ function initializeAIChat() {
     // Process message for special formatting
     function processMessage(message, type) {
         if (type === 'ai') {
-            // Convert line breaks to paragraphs
-            message = message.replace(/\n/g, '</p><p>');
-            return `<p>${message}</p>`;
+            // Convert line breaks to paragraphs and handle bullet points
+            message = message.replace(/\n/g, '<br>');
+            // Convert bullet points to proper HTML
+            message = message.replace(/•/g, '&bull;');
+            // Convert **bold** text to HTML
+            message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return message;
         }
         return `<p>${message}</p>`;
-    }
-    
-    // Generate AI response based on message content
-    function generateAIResponse(message) {
-        const lowerMessage = message.toLowerCase();
-        
-        // Investment advice
-        if (lowerMessage.includes('invest') || lowerMessage.includes('portfolio') || lowerMessage.includes('growth')) {
-            return `Based on your question about investments, here's my advice:
-
-For medium-term growth (3-5 years), I recommend:
-• **Diversified ETFs**: Consider low-cost index funds covering various sectors
-• **Robust Stocks**: Focus on companies with strong fundamentals and growth potential
-• **Risk Management**: Allocate 60% to equities, 30% to bonds, 10% to alternatives
-
-Current market conditions suggest focusing on technology and healthcare sectors, which show strong growth potential. Remember to review your risk tolerance and investment horizon regularly.`;
-        }
-        
-        // Budget planning
-        else if (lowerMessage.includes('budget') || lowerMessage.includes('monthly') || lowerMessage.includes('income')) {
-            return `I'd be happy to help with budget planning! Here's a general framework:
-
-**50/30/20 Rule:**
-• **50% Needs**: Housing, utilities, groceries, transportation
-• **30% Wants**: Dining, entertainment, subscriptions
-• **20% Savings**: Emergency fund, investments, debt repayment
-
-For personalized advice, I'd need to know your monthly income and current expenses. Would you like to share those details?`;
-        }
-        
-        // Security tips
-        else if (lowerMessage.includes('security') || lowerMessage.includes('phishing') || lowerMessage.includes('scam')) {
-            return `Great question about security! Here are current threats to watch for:
-
-**Latest Security Threats:**
-• **AI-powered phishing**: Scammers using AI to create convincing fake emails
-• **QR code scams**: Malicious QR codes redirecting to fake login pages
-• **Deepfake voice calls**: AI-generated voices impersonating family members
-
-**Protection Tips:**
-• Enable multi-factor authentication everywhere
-• Verify unexpected requests through separate channels
-• Use a password manager with strong, unique passwords
-• Regularly monitor your financial statements`;
-        }
-        
-        // Financial education
-        else if (lowerMessage.includes('compound') || lowerMessage.includes('interest') || lowerMessage.includes('explain')) {
-            return `Compound interest is a powerful financial concept! Here's how it works:
-
-**What is Compound Interest?**
-It's interest calculated on both the initial principal and accumulated interest from previous periods.
-
-**Example:**
-If you invest R10,000 at 8% annual interest:
-• Year 1: R10,800
-• Year 2: R11,664
-• Year 3: R12,597
-
-**The Rule of 72:**
-Divide 72 by your interest rate to estimate doubling time. At 8%, your money doubles every 9 years!
-
-This is why starting early with investments is so powerful.`;
-        }
-        
-        // Default response
-        else {
-            const responses = [
-                "I understand you're asking about financial matters. Could you provide more specific details so I can give you the most relevant advice?",
-                "That's an interesting question! To help you better, could you tell me more about your specific situation or goals?",
-                "I'd love to assist with that. For personalized advice, it would help to know more about your current financial situation and objectives.",
-                "Great question! Financial planning depends on individual circumstances. Could you share more about your goals and timeline?"
-            ];
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
     }
     
     // Get current time for timestamps
     function getCurrentTime() {
         const now = new Date();
         return now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+}
+
+// API call function to connect to Gemini
+async function callGeminiAPI(message, context) {
+    try {
+        console.log('Sending message to Gemini API:', message);
+        
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                context: context
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received response from Gemini API:', data);
+
+        return data.message || 'I apologize, but I couldn\'t process your request right now.';
+    } catch (error) {
+        console.error('Error calling Gemini API:', error);
+        
+        // Return fallback response based on message content
+        return getFallbackResponse(message);
+    }
+}
+
+// Fallback response function for when API fails
+function getFallbackResponse(message) {
+    const lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.includes('invest') || lowerMessage.includes('stock') || lowerMessage.includes('portfolio')) {
+        return "I'd recommend starting with a diversified portfolio. Consider low-cost index funds for beginners - they offer broad market exposure with lower risk. What's your investment timeline and risk tolerance?";
+    } else if (lowerMessage.includes('budget') || lowerMessage.includes('expense') || lowerMessage.includes('save')) {
+        return "Let's create a budget using the 50/30/20 rule: 50% for needs, 30% for wants, 20% for savings. What's your monthly after-tax income?";
+    } else if (lowerMessage.includes('security') || lowerMessage.includes('password') || lowerMessage.includes('hack')) {
+        return "For better security, enable two-factor authentication on all financial accounts, use unique strong passwords, and be cautious of phishing emails. What specific security concern do you have?";
+    } else if (lowerMessage.includes('scan') || lowerMessage.includes('link') || lowerMessage.includes('url')) {
+        return "I can help analyze links and messages for threats. Please share the URL or message content you'd like me to review for potential scams or phishing attempts.";
+    } else {
+        return "I'm here to help with your financial and security questions. Could you provide more details about what specific advice you're looking for?";
     }
 }
 
@@ -560,7 +546,7 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-in';
         setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    }, 300);
 }
 
 // Export functions for global access

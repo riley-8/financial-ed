@@ -61,7 +61,7 @@ function initializeAIWidget() {
     });
     
     // Send AI message with security context
-    function sendMessage() {
+    async function sendMessage() {
         const message = aiInput.value.trim();
         if (message) {
             addAIMessage(message, 'user');
@@ -70,27 +70,32 @@ function initializeAIWidget() {
             // Show typing indicator
             showAIWidgetTyping();
             
-            // Make API call for security-focused responses
-            fetch('/api/chat/security', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    message: message,
-                    context: 'Fraud detection and security consultation'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                // Use the correct /api/chat endpoint with security context
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        context: 'Fraud detection and cybersecurity consultation'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
                 removeAIWidgetTyping();
+                
                 if (data.message) {
                     addAIMessage(data.message, 'ai');
                 } else {
                     addAIMessage("I'm having trouble processing that right now. Please try again.", 'ai');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('AI Widget error:', error);
                 removeAIWidgetTyping();
                 
@@ -103,7 +108,7 @@ function initializeAIWidget() {
                 
                 const randomResponse = securityResponses[Math.floor(Math.random() * securityResponses.length)];
                 addAIMessage(randomResponse, 'ai');
-            });
+            }
         }
     }
     
@@ -244,12 +249,13 @@ function initializeScanners() {
     });
 }
 
-// URL Scanning
+// URL Scanning - Updated to use real Gemini API
 async function scanURL(url) {
     showScanProgress('url');
     
     try {
-        // Simulate API call to security service
+        console.log('Scanning URL with Gemini API:', url);
+        
         const response = await fetch('/api/scan/url', {
             method: 'POST',
             headers: {
@@ -258,71 +264,169 @@ async function scanURL(url) {
             body: JSON.stringify({ url: url })
         });
         
+        console.log('Response status:', response.status);
+        
         const result = await response.json();
-        displayScanResult(result, 'url', url);
-        saveScanToHistory(result, 'url', url);
+        console.log('Raw API Response:', result);
+        
+        if (!response.ok) {
+            console.error('API Error:', result);
+            throw new Error(result.error || `HTTP error! status: ${response.status}`);
+        }
+        
+        // Handle both success and error responses from the API
+        if (result.error) {
+            console.error('Gemini API Error:', result.error);
+            showNotification(`Scan failed: ${result.error}`, 'error');
+            
+            // Remove progress indicator on error
+            const progress = document.querySelector('.scan-progress');
+            if (progress) {
+                progress.remove();
+            }
+            return;
+        }
+        
+        // Transform the result to match the UI expectations
+        const transformedResult = {
+            isSafe: result.safe,
+            confidence: result.confidence / 100, // Convert percentage to decimal
+            threats: result.threats || [],
+            recommendations: Array.isArray(result.recommendations) 
+                ? result.recommendations.join(' ') 
+                : result.recommendations || 'Exercise caution when visiting this URL.'
+        };
+        
+        console.log('Transformed Result:', transformedResult);
+        
+        displayScanResult(transformedResult, 'url', url);
+        saveScanToHistory(transformedResult, 'url', url);
         
     } catch (error) {
         console.error('URL scan error:', error);
         
-        // Fallback simulation for demo
-        const simulatedResult = simulateURLScan(url);
-        displayScanResult(simulatedResult, 'url', url);
-        saveScanToHistory(simulatedResult, 'url', url);
+        // Show more specific error messages
+        let errorMessage = 'Failed to scan URL. ';
+        if (error.message.includes('503')) {
+            errorMessage += 'AI service is temporarily overloaded. Please try again in a few moments.';
+        } else if (error.message.includes('fetch')) {
+            errorMessage += 'Network connection issue. Check your internet connection.';
+        } else if (error.message.includes('Invalid URL')) {
+            errorMessage += 'Please enter a valid URL (e.g., https://example.com)';
+        } else {
+            errorMessage += 'Please try again.';
+        }
+        
+        showNotification(errorMessage, 'error');
+        
+        // Remove progress indicator on error
+        const progress = document.querySelector('.scan-progress');
+        if (progress) {
+            progress.remove();
+        }
     }
 }
 
-// Message Scanning
+// Message Scanning - Updated to use real Gemini API
 async function scanMessage(message) {
     showScanProgress('message');
     
     try {
+        console.log('Scanning message with Gemini API:', message.substring(0, 50) + '...');
+        
         const response = await fetch('/api/scan/message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({ content: message }) // Note: using 'content' not 'message'
         });
         
+        console.log('Response status:', response.status);
+        
         const result = await response.json();
-        displayScanResult(result, 'message', message.substring(0, 50) + '...');
-        saveScanToHistory(result, 'message', message.substring(0, 50) + '...');
+        console.log('Raw API Response:', result);
+        
+        if (!response.ok) {
+            console.error('API Error:', result);
+            throw new Error(result.error || `HTTP error! status: ${response.status}`);
+        }
+        
+        // Handle both success and error responses from the API
+        if (result.error) {
+            console.error('Gemini API Error:', result.error);
+            showNotification(`Scan failed: ${result.error}`, 'error');
+            
+            // Remove progress indicator on error
+            const progress = document.querySelector('.scan-progress');
+            if (progress) {
+                progress.remove();
+            }
+            return;
+        }
+        
+        // Transform the result to match the UI expectations
+        const transformedResult = {
+            isSafe: result.safe,
+            confidence: result.confidence / 100, // Convert percentage to decimal
+            threats: result.threats || [],
+            recommendations: Array.isArray(result.recommendations) 
+                ? result.recommendations.join(' ') 
+                : result.recommendations || 'Exercise caution with this message.'
+        };
+        
+        console.log('Transformed Result:', transformedResult);
+        
+        displayScanResult(transformedResult, 'message', message.substring(0, 50) + '...');
+        saveScanToHistory(transformedResult, 'message', message.substring(0, 50) + '...');
         
     } catch (error) {
         console.error('Message scan error:', error);
         
-        const simulatedResult = simulateMessageScan(message);
-        displayScanResult(simulatedResult, 'message', message.substring(0, 50) + '...');
-        saveScanToHistory(simulatedResult, 'message', message.substring(0, 50) + '...');
+        // Show more specific error messages
+        let errorMessage = 'Failed to scan message. ';
+        if (error.message.includes('503')) {
+            errorMessage += 'AI service is temporarily overloaded. Please try again in a few moments.';
+        } else if (error.message.includes('fetch')) {
+            errorMessage += 'Network connection issue. Check your internet connection.';
+        } else {
+            errorMessage += 'Please try again.';
+        }
+        
+        showNotification(errorMessage, 'error');
+        
+        // Remove progress indicator on error
+        const progress = document.querySelector('.scan-progress');
+        if (progress) {
+            progress.remove();
+        }
     }
 }
 
-// File Scanning
+// File Scanning - Updated to show proper error handling
 async function scanFiles(files) {
     showScanProgress('file');
     
     try {
-        const formData = new FormData();
-        for (let file of files) {
-            formData.append('files', file);
-        }
-        
-        const response = await fetch('/api/scan/file', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        displayScanResult(result, 'file', files[0].name);
-        saveScanToHistory(result, 'file', files[0].name);
+        // For now, show that file scanning is not yet implemented
+        setTimeout(() => {
+            const progress = document.querySelector('.scan-progress');
+            if (progress) {
+                progress.remove();
+            }
+            
+            showNotification('File scanning feature is coming soon!', 'info');
+        }, 2000);
         
     } catch (error) {
         console.error('File scan error:', error);
+        showNotification('File scanning is not available yet.', 'error');
         
-        const simulatedResult = simulateFileScan(files);
-        displayScanResult(simulatedResult, 'file', files[0].name);
-        saveScanToHistory(simulatedResult, 'file', files[0].name);
+        // Remove progress indicator on error
+        const progress = document.querySelector('.scan-progress');
+        if (progress) {
+            progress.remove();
+        }
     }
 }
 
@@ -334,7 +438,9 @@ function displayScanResult(result, type, target) {
     resultDiv.className = `scan-result ${result.isSafe ? 'safe' : 'threat'}`;
     
     const scorePercentage = Math.round(result.confidence * 100);
-    const threatsList = result.threats.map(threat => `<li>${threat}</li>`).join('');
+    const threatsList = Array.isArray(result.threats) 
+        ? result.threats.map(threat => `<li>${threat}</li>`).join('') 
+        : `<li>${result.threats || 'No specific threats detected'}</li>`;
     
     resultDiv.innerHTML = `
         <div class="result-header">
@@ -351,7 +457,7 @@ function displayScanResult(result, type, target) {
         </div>
         <div class="result-details">
             <h5>Scanned Target:</h5>
-            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem;">${target}</p>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem; word-break: break-all;">${target}</p>
             
             <h5>${result.isSafe ? 'Security Analysis' : 'Detected Threats'}:</h5>
             <ul class="${result.isSafe ? 'safe' : 'threats'}">
@@ -393,104 +499,11 @@ function showScanProgress(type) {
     
     progressDiv.innerHTML = `
         <div class="progress-spinner"></div>
-        <h4>Scanning ${typeNames[type]}...</h4>
-        <p>Analyzing for potential threats and security risks</p>
+        <h4>Analyzing ${typeNames[type]} with AI...</h4>
+        <p>Scanning for security threats and potential risks</p>
     `;
     
     resultsContainer.appendChild(progressDiv);
-}
-
-// Simulate URL Scan (for demo purposes)
-function simulateURLScan(url) {
-    // Simple heuristic checks
-    const isSafe = Math.random() > 0.3; // 70% chance of being safe
-    const confidence = Math.random() * 0.3 + 0.7; // 70-100% confidence
-    
-    const threats = [];
-    if (!isSafe) {
-        const possibleThreats = [
-            'Suspicious domain registration',
-            'Known phishing patterns detected',
-            'Unsecured connection (HTTP)',
-            'Suspicious redirect patterns',
-            'Malware distribution risk'
-        ];
-        
-        const numThreats = Math.floor(Math.random() * 3) + 1;
-        for (let i = 0; i < numThreats; i++) {
-            threats.push(possibleThreats[Math.floor(Math.random() * possibleThreats.length)]);
-        }
-    }
-    
-    const recommendations = isSafe ? 
-        'This URL appears safe. Always verify the website before entering sensitive information.' :
-        'Avoid visiting this URL. Consider using alternative trusted sources.';
-    
-    return {
-        isSafe,
-        confidence,
-        threats: [...new Set(threats)], // Remove duplicates
-        recommendations
-    };
-}
-
-// Simulate Message Scan
-function simulateMessageScan(message) {
-    const phishingKeywords = ['urgent', 'password', 'verify', 'account', 'suspended', 'click', 'limited time'];
-    const threatCount = phishingKeywords.filter(keyword => 
-        message.toLowerCase().includes(keyword)
-    ).length;
-    
-    const isSafe = threatCount < 2;
-    const confidence = Math.max(0.7, 1 - (threatCount * 0.15));
-    
-    const threats = [];
-    if (!isSafe) {
-        if (threatCount >= 3) threats.push('High probability of phishing attempt');
-        if (message.includes('http://')) threats.push('Unsecured links detected');
-        if (message.length > 200) threats.push('Suspiciously long message for common scams');
-    }
-    
-    const recommendations = isSafe ?
-        'Message appears legitimate. Always verify sender identity.' :
-        'This message shows signs of phishing. Do not click any links or provide information.';
-    
-    return {
-        isSafe,
-        confidence,
-        threats,
-        recommendations
-    };
-}
-
-// Simulate File Scan
-function simulateFileScan(files) {
-    const file = files[0];
-    const riskyExtensions = ['.exe', '.bat', '.scr', '.com'];
-    const isRisky = riskyExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
-    
-    const isSafe = !isRisky && Math.random() > 0.2;
-    const confidence = isRisky ? 0.3 : Math.random() * 0.3 + 0.7;
-    
-    const threats = [];
-    if (isRisky) {
-        threats.push('Executable file type carries higher risk');
-    }
-    if (!isSafe) {
-        threats.push('Potential malware signature detected');
-        threats.push('File behavior analysis shows suspicious patterns');
-    }
-    
-    const recommendations = isSafe ?
-        'File appears safe. Always scan files from unknown sources.' :
-        'Do not open this file. Delete it immediately and run a full system scan.';
-    
-    return {
-        isSafe,
-        confidence,
-        threats,
-        recommendations
-    };
 }
 
 // Recent Scans History
@@ -500,28 +513,37 @@ function initializeRecentScans() {
 }
 
 function getScanHistory() {
-    const stored = localStorage.getItem('fraudScannerHistory');
-    return stored ? JSON.parse(stored) : [];
+    try {
+        const stored = localStorage.getItem('fraudScannerHistory');
+        return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error('Error loading scan history:', error);
+        return [];
+    }
 }
 
 function saveScanToHistory(result, type, target) {
-    const history = getScanHistory();
-    
-    const scanRecord = {
-        id: Date.now(),
-        type,
-        target,
-        result: result.isSafe ? 'safe' : 'threat',
-        confidence: result.confidence,
-        timestamp: new Date().toISOString(),
-        threats: result.threats
-    };
-    
-    history.unshift(scanRecord); // Add to beginning
-    history.splice(10); // Keep only last 10 scans
-    
-    localStorage.setItem('fraudScannerHistory', JSON.stringify(history));
-    displayRecentScans(history);
+    try {
+        const history = getScanHistory();
+        
+        const scanRecord = {
+            id: Date.now(),
+            type,
+            target,
+            result: result.isSafe ? 'safe' : 'threat',
+            confidence: result.confidence,
+            timestamp: new Date().toISOString(),
+            threats: result.threats
+        };
+        
+        history.unshift(scanRecord); // Add to beginning
+        history.splice(10); // Keep only last 10 scans
+        
+        localStorage.setItem('fraudScannerHistory', JSON.stringify(history));
+        displayRecentScans(history);
+    } catch (error) {
+        console.error('Error saving scan to history:', error);
+    }
 }
 
 function displayRecentScans(history) {
@@ -545,7 +567,7 @@ function displayRecentScans(history) {
                 </div>
                 <div class="scan-history-details">
                     <h4>${scan.type.charAt(0).toUpperCase() + scan.type.slice(1)} Scan</h4>
-                    <p>${scan.target}</p>
+                    <p style="word-break: break-all;">${scan.target}</p>
                 </div>
             </div>
             <div class="scan-history-time">
@@ -642,7 +664,11 @@ function addAIMessage(message, sender) {
         messageDiv.innerHTML = `<p>${message}</p>`;
     } else {
         messageDiv.className = 'ai-message';
-        messageDiv.innerHTML = `<p>${message}</p>`;
+        // Handle formatting for AI responses
+        const formattedMessage = message
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        messageDiv.innerHTML = `<p>${formattedMessage}</p>`;
     }
     
     aiMessages.appendChild(messageDiv);
