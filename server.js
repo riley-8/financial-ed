@@ -117,7 +117,14 @@ function parseGeminiResponse(text, type = "url") {
     }
   }
 }
-
+app.post('/api/ai-proxy', async (req, res) => {
+  const { prompt, provider, model } = req.body;
+  
+  // Make API call with your stored API keys
+  const response = await callAIProvider(prompt, provider, model);
+  
+  res.json({ content: response });
+});
 // AI Chat endpoint for Gemini integration
 app.post("/api/chat", async (req, res) => {
   try {

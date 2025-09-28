@@ -1388,3 +1388,603 @@ window.SecurityCenter = {
     showAtmDosDontsModal,
     securityManager
 };
+
+
+// AI-Powered Scam Detection System
+
+// Configuration
+const AI_CONFIG = {
+    // Use OpenAI API (you'll need to get an API key)
+    provider: 'openai',
+    apiKey: 'your-openai-api-key-here', // Store securely in environment variables
+    model: 'gpt-4',
+    baseUrl: 'https://api.openai.com/v1/chat/completions',
+    
+    // Alternative: Use Claude API
+    // provider: 'anthropic',
+    // apiKey: 'your-anthropic-api-key-here',
+    // model: 'claude-3-sonnet-20240229',
+    // baseUrl: 'https://api.anthropic.com/v1/messages',
+    
+    // For security, consider using a backend proxy
+    useProxy: true,
+    proxyUrl: '/api/ai-proxy' // Your backend endpoint
+};
+
+// AI Scam Detection Service
+class AIScamDetectionService {
+    constructor(config) {
+        this.config = config;
+        this.cache = new Map();
+        this.cacheExpiry = 2 * 60 * 60 * 1000; // 2 hours
+    }
+
+    async detectLatestScam() {
+        try {
+            // Check cache first
+            const cached = this.getCachedScam();
+            if (cached) {
+                return cached;
+            }
+
+            // Show loading state
+            this.showLoadingState();
+
+            // Fetch latest scam data
+            const scamData = await this.queryAIForLatestScam();
+            
+            // Cache the result
+            this.cacheScamData(scamData);
+            
+            return scamData;
+        } catch (error) {
+            console.error('Error detecting latest scam:', error);
+            return this.getFallbackScam();
+        }
+    }
+
+    async queryAIForLatestScam() {
+        const prompt = this.buildScamDetectionPrompt();
+        
+        if (this.config.useProxy) {
+            return await this.queryThroughProxy(prompt);
+        } else {
+            return await this.queryDirectly(prompt);
+        }
+    }
+
+    buildScamDetectionPrompt() {
+        const currentDate = new Date().toLocaleDateString();
+        
+        return `You are a financial security expert. Based on current trends and recent reports as of ${currentDate}, identify the most prevalent and dangerous financial scam currently targeting consumers.
+
+Please provide a JSON response with the following structure:
+{
+  "title": "Brief descriptive title of the scam",
+  "alertDate": "${currentDate}",
+  "severity": "high|medium|low",
+  "description": "2-3 sentence description of what this scam involves",
+  "targetAudience": "Who this scam primarily targets",
+  "keyIndicators": [
+    "List of 4-6 warning signs or red flags",
+    "That people should watch out for"
+  ],
+  "howItWorks": [
+    "Step-by-step breakdown of how the scam operates",
+    "Each step should be clear and concise",
+    "Include 4-6 steps typically"
+  ],
+  "examples": [
+    "Real-world example scenarios",
+    "2-3 specific examples of how this manifests"
+  ],
+  "protectionMeasures": [
+    "Specific actionable steps to protect against this scam",
+    "Include 5-7 practical prevention tips"
+  ],
+  "victimSteps": [
+    "What to do if someone falls victim to this scam",
+    "Include immediate and follow-up actions"
+  ],
+  "reportingInfo": {
+    "description": "How and where to report this scam",
+    "urgency": "How quickly to report (immediate/within hours/within days)"
+  }
+}
+
+Focus on scams that are:
+1. Currently active and widespread
+2. Specifically targeting financial information or money
+3. Have recent documented cases
+4. Pose significant financial risk
+
+Avoid outdated or less common scam types. Prioritize accuracy and current relevance.`;
+    }
+
+    async queryThroughProxy(prompt) {
+        const response = await fetch(this.config.proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                provider: this.config.provider,
+                model: this.config.model
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`AI API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return this.parseAIResponse(data.content);
+    }
+
+    async queryDirectly(prompt) {
+        let requestData, headers;
+
+        if (this.config.provider === 'openai') {
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+            };
+            
+            requestData = {
+                model: this.config.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a financial security expert providing current scam information.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.3,
+                max_tokens: 2000
+            };
+        } else if (this.config.provider === 'anthropic') {
+            headers = {
+                'Content-Type': 'application/json',
+                'x-api-key': this.config.apiKey,
+                'anthropic-version': '2023-06-01'
+            };
+            
+            requestData = {
+                model: this.config.model,
+                max_tokens: 2000,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ]
+            };
+        }
+
+        const response = await fetch(this.config.baseUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`AI API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        let content;
+        if (this.config.provider === 'openai') {
+            content = data.choices[0].message.content;
+        } else if (this.config.provider === 'anthropic') {
+            content = data.content[0].text;
+        }
+
+        return this.parseAIResponse(content);
+    }
+
+    parseAIResponse(content) {
+        try {
+            // Extract JSON from the response (in case there's extra text)
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                throw new Error('No JSON found in AI response');
+            }
+
+            const scamData = JSON.parse(jsonMatch[0]);
+            
+            // Validate required fields
+            this.validateScamData(scamData);
+            
+            return scamData;
+        } catch (error) {
+            console.error('Error parsing AI response:', error);
+            throw new Error('Failed to parse AI response');
+        }
+    }
+
+    validateScamData(data) {
+        const requiredFields = ['title', 'description', 'keyIndicators', 'howItWorks', 'protectionMeasures'];
+        
+        for (const field of requiredFields) {
+            if (!data[field]) {
+                throw new Error(`Missing required field: ${field}`);
+            }
+        }
+
+        // Ensure arrays have content
+        if (!Array.isArray(data.keyIndicators) || data.keyIndicators.length === 0) {
+            throw new Error('keyIndicators must be a non-empty array');
+        }
+    }
+
+    getCachedScam() {
+        const cached = this.cache.get('latestScam');
+        if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+            return cached.data;
+        }
+        return null;
+    }
+
+    cacheScamData(data) {
+        this.cache.set('latestScam', {
+            data: data,
+            timestamp: Date.now()
+        });
+    }
+
+    getFallbackScam() {
+        return {
+            title: "AI-Generated Romance Scams",
+            alertDate: new Date().toLocaleDateString(),
+            severity: "high",
+            description: "Scammers are using AI tools to create more convincing fake profiles and personas on dating apps and social media to build emotional connections before requesting money.",
+            targetAudience: "Adults using dating apps and social media, particularly those seeking romantic connections",
+            keyIndicators: [
+                "Profile photos that look too perfect or professional",
+                "Rapid escalation of romantic feelings",
+                "Reluctance to meet in person or video chat",
+                "Requests for money for emergencies or travel",
+                "Limited or inconsistent personal details",
+                "Messages that seem scripted or overly polished"
+            ],
+            howItWorks: [
+                "Scammer creates fake profiles using AI-generated photos",
+                "Initiates contact and builds emotional connection over weeks/months",
+                "Creates elaborate backstory using AI-assisted writing",
+                "Manufactures emergency requiring immediate financial help",
+                "Requests money transfer through untraceable methods",
+                "Disappears once money is sent or continues with new emergencies"
+            ],
+            examples: [
+                "Military personnel deployed overseas needing help with travel expenses",
+                "Business traveler stuck in foreign country needing emergency funds"
+            ],
+            protectionMeasures: [
+                "Reverse image search profile photos",
+                "Video chat before developing serious feelings",
+                "Never send money to someone you haven't met in person",
+                "Be suspicious of requests for wire transfers or gift cards",
+                "Trust your instincts if something feels off"
+            ],
+            victimSteps: [
+                "Stop all contact with the scammer immediately",
+                "Report to the dating platform or social media site",
+                "Contact your bank if you've sent money",
+                "File a report with the FTC and local police"
+            ],
+            reportingInfo: {
+                description: "Report to FTC, dating platform, and local authorities",
+                urgency: "immediate"
+            }
+        };
+    }
+
+    showLoadingState() {
+        const latestScamSection = document.querySelector('#latest-scam-page .scam-alert');
+        if (latestScamSection) {
+            latestScamSection.innerHTML = `
+                <div class="loading-container" style="text-align: center; padding: 3rem;">
+                    <div class="loading-spinner" style="
+                        width: 40px;
+                        height: 40px;
+                        border: 4px solid rgba(34, 197, 94, 0.1);
+                        border-left: 4px solid #22c55e;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                        margin: 0 auto 1rem;
+                    "></div>
+                    <h3 style="color: #f8fafc; margin-bottom: 0.5rem;">
+                        <i class="fas fa-robot"></i>
+                        AI Analyzing Current Threats
+                    </h3>
+                    <p style="color: #94a3b8;">
+                        Our AI is scanning the latest security reports to identify the most current financial scams...
+                    </p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Enhanced Security Center with AI Integration
+class EnhancedSecurityCenter extends SecurityStatusManager {
+    constructor() {
+        super();
+        this.aiScamService = new AIScamDetectionService(AI_CONFIG);
+        this.currentScamData = null;
+    }
+
+    async handleLatestScamClick() {
+        try {
+            // Show the latest scam page first
+            showPage(latestScamPage);
+            
+            // Get AI-detected scam data
+            this.currentScamData = await this.aiScamService.detectLatestScam();
+            
+            // Update the page with AI data
+            this.updateLatestScamPage(this.currentScamData);
+            
+        } catch (error) {
+            console.error('Error loading latest scam:', error);
+            this.showScamLoadError();
+        }
+    }
+
+    updateLatestScamPage(scamData) {
+        const latestScamSection = document.getElementById('latest-scam-page');
+        
+        if (!latestScamSection) return;
+
+        // Update the scam alert content
+        const scamAlert = latestScamSection.querySelector('.scam-alert');
+        
+        if (scamAlert) {
+            scamAlert.innerHTML = this.generateScamAlertHTML(scamData);
+            
+            // Re-attach event listeners
+            this.attachScamPageEventListeners();
+        }
+    }
+
+    generateScamAlertHTML(scamData) {
+        const severityColor = {
+            high: '#ef4444',
+            medium: '#f59e0b',
+            low: '#22c55e'
+        }[scamData.severity] || '#f59e0b';
+
+        const severityIcon = {
+            high: 'fas fa-exclamation-triangle',
+            medium: 'fas fa-exclamation-circle',
+            low: 'fas fa-info-circle'
+        }[scamData.severity] || 'fas fa-exclamation-circle';
+
+        return `
+            <header class="alert-header">
+                <i class="${severityIcon}" style="color: ${severityColor};"></i>
+                <h2>${scamData.title}</h2>
+                <time datetime="${scamData.alertDate}">Alert Date: ${scamData.alertDate}</time>
+                <div class="ai-badge" style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    background: rgba(34, 197, 94, 0.1);
+                    border: 1px solid rgba(34, 197, 94, 0.3);
+                    border-radius: 12px;
+                    padding: 0.25rem 0.75rem;
+                    margin-top: 0.5rem;
+                    font-size: 0.8rem;
+                    color: #22c55e;
+                ">
+                    <i class="fas fa-robot"></i>
+                    AI-Detected Current Threat
+                </div>
+            </header>
+            
+            <section class="alert-content">
+                <p>${scamData.description}</p>
+                
+                <section class="scam-details">
+                    <h3>Key Warning Signs:</h3>
+                    <ul>
+                        ${scamData.keyIndicators.map(indicator => `<li>${indicator}</li>`).join('')}
+                    </ul>
+                </section>
+
+                ${scamData.targetAudience ? `
+                    <section class="scam-details">
+                        <h3>Primary Targets:</h3>
+                        <p>${scamData.targetAudience}</p>
+                    </section>
+                ` : ''}
+
+                ${scamData.examples ? `
+                    <section class="scam-details">
+                        <h3>Common Examples:</h3>
+                        <ul>
+                            ${scamData.examples.map(example => `<li>${example}</li>`).join('')}
+                        </ul>
+                    </section>
+                ` : ''}
+                
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                    <button class="card-btn" id="how-it-works-btn">
+                        <i class="fas fa-info-circle"></i>
+                        How It Works
+                    </button>
+                    <button class="card-btn secondary" id="protection-tips-btn">
+                        <i class="fas fa-shield-alt"></i>
+                        Protection Tips
+                    </button>
+                    <button class="card-btn secondary" id="victim-help-btn">
+                        <i class="fas fa-life-ring"></i>
+                        If You're a Victim
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    attachScamPageEventListeners() {
+        // How it works button
+        const howItWorksBtn = document.getElementById('how-it-works-btn');
+        if (howItWorksBtn) {
+            howItWorksBtn.addEventListener('click', () => {
+                this.showScamDetailsModal(this.currentScamData);
+            });
+        }
+
+        // Protection tips button
+        const protectionBtn = document.getElementById('protection-tips-btn');
+        if (protectionBtn) {
+            protectionBtn.addEventListener('click', () => {
+                this.showProtectionTipsModal(this.currentScamData);
+            });
+        }
+
+        // Victim help button
+        const victimBtn = document.getElementById('victim-help-btn');
+        if (victimBtn) {
+            victimBtn.addEventListener('click', () => {
+                this.showVictimHelpModal(this.currentScamData);
+            });
+        }
+    }
+
+    showScamDetailsModal(scamData) {
+        const modal = this.createDynamicModal('scam-details', 'How This Scam Works', `
+            <section class="scam-steps">
+                <h3>Step-by-Step Breakdown:</h3>
+                <ol>
+                    ${scamData.howItWorks.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            </section>
+            
+            <section class="report-reminder">
+                <h3>Report This Scam:</h3>
+                <p>If you encounter this scam, report it immediately using the numbers in our <strong>Report Fraud</strong> section.</p>
+                <p><strong>Urgency:</strong> ${scamData.reportingInfo?.urgency || 'immediate'}</p>
+                <button class="card-btn" onclick="document.getElementById('report-fraud-btn').click()">
+                    <i class="fas fa-phone-alt"></i>
+                    Report Now
+                </button>
+            </section>
+        `);
+        
+        toggleModal(modal);
+    }
+
+    showProtectionTipsModal(scamData) {
+        const modal = this.createDynamicModal('protection-tips', 'Protection Measures', `
+            <section class="protection-measures">
+                <h3>How to Protect Yourself:</h3>
+                <ul>
+                    ${scamData.protectionMeasures.map(measure => `<li>${measure}</li>`).join('')}
+                </ul>
+            </section>
+        `);
+        
+        toggleModal(modal);
+    }
+
+    showVictimHelpModal(scamData) {
+        const modal = this.createDynamicModal('victim-help', 'If You\'re a Victim', `
+            <section class="victim-steps">
+                <h3>Immediate Steps to Take:</h3>
+                <ol>
+                    ${scamData.victimSteps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            </section>
+            
+            ${scamData.reportingInfo ? `
+                <section class="reporting-info">
+                    <h3>Reporting Information:</h3>
+                    <p>${scamData.reportingInfo.description}</p>
+                </section>
+            ` : ''}
+        `);
+        
+        toggleModal(modal);
+    }
+
+    createDynamicModal(id, title, content) {
+        // Remove existing modal if it exists
+        const existing = document.getElementById(`${id}-modal`);
+        if (existing) {
+            document.body.removeChild(existing);
+        }
+
+        const modal = document.createElement('dialog');
+        modal.className = 'modal';
+        modal.id = `${id}-modal`;
+        
+        modal.innerHTML = `
+            <article class="modal-content">
+                <header class="modal-header">
+                    <h2>${title}</h2>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </header>
+                <section class="modal-body">
+                    ${content}
+                </section>
+            </article>
+        `;
+        
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    showScamLoadError() {
+        const latestScamSection = document.querySelector('#latest-scam-page .scam-alert');
+        if (latestScamSection) {
+            latestScamSection.innerHTML = `
+                <div class="error-container" style="text-align: center; padding: 3rem; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #ef4444; margin-bottom: 0.5rem;">Unable to Load Latest Scam Data</h3>
+                    <p style="color: #94a3b8; margin-bottom: 1.5rem;">
+                        We're having trouble connecting to our AI threat detection service. Please try again later.
+                    </p>
+                    <button class="card-btn" onclick="enhancedSecurityCenter.handleLatestScamClick()">
+                        <i class="fas fa-redo"></i>
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Initialize enhanced security center
+const enhancedSecurityCenter = new EnhancedSecurityCenter();
+
+// Override the original latest scam button click handler
+document.addEventListener('DOMContentLoaded', function() {
+    const latestScamBtn = document.getElementById('latest-scam-btn');
+    if (latestScamBtn) {
+        // Remove existing event listeners
+        latestScamBtn.replaceWith(latestScamBtn.cloneNode(true));
+        
+        // Add new AI-powered event listener
+        document.getElementById('latest-scam-btn').addEventListener('click', () => {
+            enhancedSecurityCenter.handleLatestScamClick();
+        });
+    }
+});
+
+// Add CSS for loading animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
