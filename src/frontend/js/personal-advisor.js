@@ -10,6 +10,7 @@ function initializePersonalAdvisor() {
     initializeAIChat();
     initializeSearch();
     initializeVoiceRecording();
+    initializeAudioPlayer();
 }
 
 // Sidebar Navigation
@@ -119,7 +120,7 @@ function sendWidgetMessage() {
         // Scroll to bottom
         aiMessages.scrollTop = aiMessages.scrollHeight;
 
-        // Process AI response - ONLY CALL THIS ONCE
+        // Process AI response
         processWidgetAIMessage(message, typingIndicator);
     }
 }
@@ -160,12 +161,12 @@ function sendChatMessage() {
         // Show typing indicator
         const typingIndicator = showTypingIndicator();
 
-        // Process AI message - ONLY CALL THIS ONCE
+        // Process AI message
         processAIMessage(message, typingIndicator);
     }
 }
 
-function addMessageToChat(sender, message) {
+function addMessageToChat(sender, message, audioText = null) {
     const chatMessages = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}-message`;
@@ -189,6 +190,27 @@ function addMessageToChat(sender, message) {
         });
     }
 
+    // Add audio controls for AI messages
+    if (sender === 'ai' && audioText) {
+        const audioControls = document.createElement('div');
+        audioControls.className = 'message-audio-controls';
+        audioControls.innerHTML = `
+            <button class="audio-play-btn" data-text="${audioText.replace(/"/g, '&quot;')}">
+                <i class="fas fa-play"></i>
+                <span>Play Audio</span>
+            </button>
+            <audio class="message-audio" preload="none"></audio>
+        `;
+        content.appendChild(audioControls);
+        
+        // Add event listener to the audio button
+        const audioBtn = audioControls.querySelector('.audio-play-btn');
+        audioBtn.addEventListener('click', function() {
+            const text = this.getAttribute('data-text');
+            playTextToSpeech(text, this);
+        });
+    }
+
     const timestamp = document.createElement('div');
     timestamp.className = 'message-timestamp';
     timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -199,6 +221,8 @@ function addMessageToChat(sender, message) {
 
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    return messageDiv;
 }
 
 function showTypingIndicator() {
@@ -406,8 +430,8 @@ async function processAIMessage(message, typingIndicator) {
             typingIndicator.remove();
         }
         
-        // Add AI response - ONLY ONCE
-        addMessageToChat('ai', response);
+        // Add AI response with audio controls
+        addMessageToChat('ai', response, response);
 
     } catch (error) {
         console.error('AI processing error:', error);
@@ -417,8 +441,9 @@ async function processAIMessage(message, typingIndicator) {
             typingIndicator.remove();
         }
         
-        // Show fallback response - ONLY ONCE
-        addMessageToChat('ai', getAIResponse(message));
+        // Show fallback response with audio controls
+        const fallbackResponse = getAIResponse(message);
+        addMessageToChat('ai', fallbackResponse, fallbackResponse);
     }
 }
 
@@ -433,13 +458,28 @@ async function processWidgetAIMessage(message, typingIndicator) {
             typingIndicator.remove();
         }
         
-        // Add AI response to widget
+        // Add AI response to widget with audio controls
         const aiMessages = document.getElementById('ai-messages');
         const aiResponse = document.createElement('div');
         aiResponse.className = 'ai-message';
-        aiResponse.textContent = response;
+        aiResponse.innerHTML = `
+            <p>${response}</p>
+            <div class="message-audio-controls">
+                <button class="audio-play-btn" data-text="${response.replace(/"/g, '&quot;')}">
+                    <i class="fas fa-play"></i>
+                </button>
+                <audio class="message-audio" preload="none"></audio>
+            </div>
+        `;
         aiMessages.appendChild(aiResponse);
         aiMessages.scrollTop = aiMessages.scrollHeight;
+        
+        // Add event listener to the audio button
+        const audioBtn = aiResponse.querySelector('.audio-play-btn');
+        audioBtn.addEventListener('click', function() {
+            const text = this.getAttribute('data-text');
+            playTextToSpeech(text, this);
+        });
 
     } catch (error) {
         console.error('Widget AI processing error:', error);
@@ -449,14 +489,190 @@ async function processWidgetAIMessage(message, typingIndicator) {
             typingIndicator.remove();
         }
         
-        // Show fallback response in widget
+        // Show fallback response in widget with audio controls
+        const fallbackResponse = getAIResponse(message);
         const aiMessages = document.getElementById('ai-messages');
         const aiResponse = document.createElement('div');
         aiResponse.className = 'ai-message';
-        aiResponse.textContent = getAIResponse(message);
+        aiResponse.innerHTML = `
+            <p>${fallbackResponse}</p>
+            <div class="message-audio-controls">
+                <button class="audio-play-btn" data-text="${fallbackResponse.replace(/"/g, '&quot;')}">
+                    <i class="fas fa-play"></i>
+                </button>
+                <audio class="message-audio" preload="none"></audio>
+            </div>
+        `;
         aiMessages.appendChild(aiResponse);
         aiMessages.scrollTop = aiMessages.scrollHeight;
+        
+        // Add event listener to the audio button
+        const audioBtn = aiResponse.querySelector('.audio-play-btn');
+        audioBtn.addEventListener('click', function() {
+            const text = this.getAttribute('data-text');
+            playTextToSpeech(text, this);
+        });
     }
+}
+
+// Text-to-Speech Functionality
+async function playTextToSpeech(text, buttonElement) {
+    try {
+        // Show loading state
+        if (buttonElement) {
+            buttonElement.classList.add('playing');
+            buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Generating Audio...</span>';
+            buttonElement.disabled = true;
+        }
+        
+        showNotification('Generating audio response...', 'info');
+        
+        // Call text-to-speech API
+        const audioUrl = await convertTextToSpeech(text);
+        
+        if (audioUrl) {
+            // Play audio using global audio player
+            playAudioInGlobalPlayer(audioUrl, text);
+            
+            if (buttonElement) {
+                buttonElement.innerHTML = '<i class="fas fa-stop"></i><span>Stop Audio</span>';
+                buttonElement.disabled = false;
+            }
+        }
+    } catch (error) {
+        console.error('Text-to-speech error:', error);
+        showNotification('Error generating audio. Please try again.', 'error');
+        
+        if (buttonElement) {
+            buttonElement.classList.remove('playing');
+            buttonElement.innerHTML = '<i class="fas fa-play"></i><span>Play Audio</span>';
+            buttonElement.disabled = false;
+        }
+    }
+}
+
+async function convertTextToSpeech(text) {
+    try {
+        const response = await fetch('/api/text-to-speech', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                voice: 'en-US-1', // Default voice
+                speed: 1.0 // Normal speed
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Text-to-speech API error');
+        }
+
+        const data = await response.json();
+        return data.audioUrl || data.audio_url;
+    } catch (error) {
+        console.error('Text-to-speech API error:', error);
+        
+        // Fallback: Use browser's SpeechSynthesis API
+        return await fallbackTextToSpeech(text);
+    }
+}
+
+function fallbackTextToSpeech(text) {
+    return new Promise((resolve) => {
+        if (!('speechSynthesis' in window)) {
+            showNotification('Text-to-speech not supported in this browser.', 'warning');
+            resolve(null);
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.8;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        
+        utterance.onend = function() {
+            resolve('browser_synthesis');
+        };
+        
+        utterance.onerror = function() {
+            showNotification('Browser text-to-speech failed.', 'error');
+            resolve(null);
+        };
+        
+        speechSynthesis.speak(utterance);
+    });
+}
+
+// Global Audio Player functionality
+function initializeAudioPlayer() {
+    const globalAudioPlayer = document.getElementById('global-audio-player');
+    const closeAudioBtn = document.getElementById('close-audio-player');
+    const playPauseBtn = document.getElementById('play-pause-audio');
+    const stopBtn = document.getElementById('stop-audio');
+    const downloadBtn = document.getElementById('download-audio');
+    const globalAudio = document.getElementById('global-audio');
+
+    closeAudioBtn.addEventListener('click', function() {
+        globalAudioPlayer.classList.remove('active');
+        globalAudio.pause();
+        globalAudio.currentTime = 0;
+    });
+
+    playPauseBtn.addEventListener('click', function() {
+        if (globalAudio.paused) {
+            globalAudio.play();
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            globalAudio.pause();
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    });
+
+    stopBtn.addEventListener('click', function() {
+        globalAudio.pause();
+        globalAudio.currentTime = 0;
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    });
+
+    downloadBtn.addEventListener('click', function() {
+        if (globalAudio.src) {
+            const a = document.createElement('a');
+            a.href = globalAudio.src;
+            a.download = 'ai-response.mp3';
+            a.click();
+        }
+    });
+
+    globalAudio.addEventListener('ended', function() {
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    });
+}
+
+function playAudioInGlobalPlayer(audioUrl, text) {
+    const globalAudioPlayer = document.getElementById('global-audio-player');
+    const globalAudio = document.getElementById('global-audio');
+    const playPauseBtn = document.getElementById('play-pause-audio');
+
+    if (audioUrl === 'browser_synthesis') {
+        // Browser synthesis is already playing
+        return;
+    }
+
+    globalAudio.src = audioUrl;
+    globalAudioPlayer.classList.add('active');
+    
+    globalAudio.onloadeddata = function() {
+        globalAudio.play();
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        showNotification('Playing audio response...', 'success');
+    };
+    
+    globalAudio.onerror = function() {
+        showNotification('Error playing audio.', 'error');
+        globalAudioPlayer.classList.remove('active');
+    };
 }
 
 // API call function to connect to Gemini
@@ -485,7 +701,7 @@ async function callGeminiAPI(message, context) {
         return data.message || 'I apologize, but I couldn\'t process your request right now.';
     } catch (error) {
         console.error('Error calling Gemini API:', error);
-        throw error; // Re-throw to be handled by the caller
+        throw error;
     }
 }
 
@@ -524,17 +740,14 @@ function initializeSearch() {
 
 function performSearch(query) {
     showNotification(`Searching for: ${query}`);
-    // Implement search functionality
     console.log('Search query:', query);
 }
 
 // Utility Functions
 function showNotification(message, type = 'info') {
-    // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.notification');
     existingNotifications.forEach(notification => notification.remove());
 
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
@@ -544,7 +757,6 @@ function showNotification(message, type = 'info') {
         </div>
     `;
     
-    // Add styles if not already added
     if (!document.querySelector('#notification-styles')) {
         const styles = document.createElement('style');
         styles.id = 'notification-styles';
@@ -588,7 +800,6 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Remove notification after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideInRight 0.3s ease-in reverse';
         setTimeout(() => {

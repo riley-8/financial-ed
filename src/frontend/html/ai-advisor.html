@@ -116,6 +116,13 @@
                                 <li>Risk assessment and management</li>
                             </ul>
                             <p>What would you like to discuss today? You can type or click the microphone to speak.</p>
+                            <div class="message-audio-controls">
+                                <button class="audio-play-btn" data-text="Hello! I'm your Personal financial advisor. I can help you with investment advice and portfolio optimization, budget planning and financial goal setting, fraud detection and security recommendations, financial education and literacy, and risk assessment and management. What would you like to discuss today? You can type or click the microphone to speak.">
+                                    <i class="fas fa-play"></i>
+                                    <span>Play Audio</span>
+                                </button>
+                                <audio class="message-audio" preload="none"></audio>
+                            </div>
                         </div>
                         <div class="message-timestamp">
                             Just now
@@ -183,10 +190,10 @@
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-microphone"></i>
+                        <i class="fas fa-volume-up"></i>
                     </div>
-                    <h3>Voice Commands</h3>
-                    <p>Speak naturally and get instant AI-powered financial advice</p>
+                    <h3>Audio Responses</h3>
+                    <p>Listen to AI responses with natural-sounding text-to-speech technology</p>
                 </div>
             </div>
         </section>
@@ -203,6 +210,12 @@
             <div class="ai-messages" id="ai-messages">
                 <div class="ai-message">
                     <p>Hi! I'm your quick assistant. How can I help you?</p>
+                    <div class="message-audio-controls">
+                        <button class="audio-play-btn" data-text="Hi! I'm your quick assistant. How can I help you?">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <audio class="message-audio" preload="none"></audio>
+                    </div>
                 </div>
             </div>
             <div class="ai-input-container">
@@ -219,6 +232,31 @@
     <button class="ai-fab" id="ai-fab">
         <i class="fas fa-robot"></i>
     </button>
+
+    <!-- Global Audio Player -->
+    <div id="global-audio-player" class="global-audio-player">
+        <div class="audio-player-content">
+            <button id="close-audio-player" class="close-audio-btn">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="audio-info">
+                <i class="fas fa-robot"></i>
+                <span>AI Response Audio</span>
+            </div>
+            <audio id="global-audio" controls></audio>
+            <div class="audio-controls">
+                <button id="play-pause-audio" class="audio-control-btn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button id="stop-audio" class="audio-control-btn">
+                    <i class="fas fa-stop"></i>
+                </button>
+                <button id="download-audio" class="audio-control-btn">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="../js/personal-advisor.js"></script>
 </body>
