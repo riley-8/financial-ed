@@ -1,837 +1,592 @@
-// Personal Advisor JavaScript functionality
-document.addEventListener('DOMContentLoaded', function() {
-    initializePersonalAdvisor();
-});
+// Theme Management
+class ThemeManager {
+    constructor() {
+        this.currentTheme = localStorage.getItem('theme') || 'dark';
+        this.init();
+    }
 
-function initializePersonalAdvisor() {
-    initializeSidebar();
-    initializeNavigation();
-    initializeAIWidget();
-    initializeAIChat();
-    initializeSearch();
-    initializeVoiceRecording();
-    initializeAudioPlayer();
+    init() {
+        this.applyTheme(this.currentTheme);
+        this.setupEventListeners();
+    }
+
+    applyTheme(theme) {
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const icon = themeToggle.querySelector('i');
+
+        if (theme === 'light') {
+            body.classList.remove('dark-mode');
+            body.classList.add('light-mode');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+
+        localStorage.setItem('theme', theme);
+        this.currentTheme = theme;
+    }
+
+    toggleTheme() {
+        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+        this.applyTheme(newTheme);
+    }
+
+    setupEventListeners() {
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => this.toggleTheme());
+    }
 }
 
-// Sidebar Navigation
-function initializeSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+// Chat Manager
+class ChatManager {
+    constructor() {
+        this.chatMessages = document.getElementById('chat-messages');
+        this.chatInput = document.getElementById('chat-input');
+        this.sendButton = document.getElementById('send-message');
+        this.voiceButton = document.getElementById('voice-record');
+        this.voiceStatus = document.getElementById('voice-status');
+        this.stopRecordingButton = document.getElementById('stop-recording');
+        this.recognition = null;
+        this.isRecording = false;
+        this.init();
+    }
 
-    // Toggle sidebar on mobile
-    sidebarToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
-    });
+    init() {
+        this.setupEventListeners();
+        this.initSpeechRecognition();
+    }
 
-    // Handle navigation
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (this.getAttribute('href').startsWith('#')) {
-                e.preventDefault();
-                
-                // Remove active class from all links
-                navLinks.forEach(l => l.classList.remove('active'));
-                // Add active class to clicked link
-                this.classList.add('active');
+    setupEventListeners() {
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+
+        this.voiceButton.addEventListener('click', () => this.toggleVoiceRecording());
+        this.stopRecordingButton.addEventListener('click', () => this.stopVoiceRecording());
+
+        // Quick action buttons
+        document.querySelectorAll('.quick-action').forEach(button => {
+            button.addEventListener('click', () => {
+                const message = button.getAttribute('data-message');
+                this.addUserMessage(message);
+                this.generateAIResponse(message);
+            });
+        });
+
+        // Audio play buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.audio-play-btn')) {
+                this.handleAudioPlay(e.target.closest('.audio-play-btn'));
             }
-            // External links will navigate normally
-        });
-    });
-}
-
-// Navigation Features
-function initializeNavigation() {
-    // Profile dropdown
-    const profileDropdown = document.querySelector('.profile-dropdown');
-    
-    // Notifications
-    const notificationBtn = document.getElementById('notifications');
-    const messagesBtn = document.getElementById('messages');
-    
-    notificationBtn.addEventListener('click', function() {
-        showNotification('Notifications feature coming soon!');
-    });
-    
-    messagesBtn.addEventListener('click', function() {
-        showNotification('Messages feature coming soon!');
-    });
-}
-
-// AI Widget Functionality
-function initializeAIWidget() {
-    const aiFab = document.getElementById('ai-fab');
-    const aiWidget = document.getElementById('ai-widget');
-    const closeWidget = document.getElementById('close-ai-widget');
-    const sendAiMessage = document.getElementById('send-ai-message');
-    const aiInput = document.getElementById('ai-input');
-    const widgetVoiceRecord = document.getElementById('widget-voice-record');
-
-    aiFab.addEventListener('click', function() {
-        aiWidget.classList.add('active');
-        aiFab.style.display = 'none';
-    });
-
-    closeWidget.addEventListener('click', function() {
-        aiWidget.classList.remove('active');
-        aiFab.style.display = 'flex';
-    });
-
-    sendAiMessage.addEventListener('click', sendWidgetMessage);
-    aiInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendWidgetMessage();
-        }
-    });
-
-    widgetVoiceRecord.addEventListener('click', function() {
-        toggleVoiceRecording('widget');
-    });
-}
-
-function sendWidgetMessage() {
-    const aiInput = document.getElementById('ai-input');
-    const aiMessages = document.getElementById('ai-messages');
-    const message = aiInput.value.trim();
-
-    if (message) {
-        // Add user message
-        const userMessage = document.createElement('div');
-        userMessage.className = 'user-message-widget';
-        userMessage.textContent = message;
-        aiMessages.appendChild(userMessage);
-
-        // Clear input
-        aiInput.value = '';
-
-        // Show typing indicator
-        const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'typing-indicator';
-        typingIndicator.innerHTML = `
-            <div class="typing-dots">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            </div>
-            <span>AI is thinking...</span>
-        `;
-        aiMessages.appendChild(typingIndicator);
-
-        // Scroll to bottom
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-
-        // Process AI response
-        processWidgetAIMessage(message, typingIndicator);
-    }
-}
-
-// AI Chat Functionality
-function initializeAIChat() {
-    const sendButton = document.getElementById('send-message');
-    const chatInput = document.getElementById('chat-input');
-    const quickActions = document.querySelectorAll('.quick-action');
-
-    sendButton.addEventListener('click', sendChatMessage);
-    chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendChatMessage();
-        }
-    });
-
-    quickActions.forEach(action => {
-        action.addEventListener('click', function() {
-            const message = this.getAttribute('data-message');
-            chatInput.value = message;
-            sendChatMessage();
-        });
-    });
-}
-
-function sendChatMessage() {
-    const chatInput = document.getElementById('chat-input');
-    const message = chatInput.value.trim();
-
-    if (message) {
-        // Add user message
-        addMessageToChat('user', message);
-        
-        // Clear input
-        chatInput.value = '';
-
-        // Show typing indicator
-        const typingIndicator = showTypingIndicator();
-
-        // Process AI message
-        processAIMessage(message, typingIndicator);
-    }
-}
-
-function addMessageToChat(sender, message, audioText = null) {
-    const chatMessages = document.getElementById('chat-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}-message`;
-
-    const avatar = document.createElement('div');
-    avatar.className = 'message-avatar';
-    avatar.innerHTML = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-
-    const content = document.createElement('div');
-    content.className = 'message-content';
-    
-    // Handle both text and HTML content
-    if (typeof message === 'string' && message.includes('<')) {
-        content.innerHTML = message;
-    } else {
-        const messageParagraphs = message.split('\n').filter(p => p.trim());
-        messageParagraphs.forEach((paragraph, index) => {
-            const p = document.createElement('p');
-            p.textContent = paragraph;
-            content.appendChild(p);
         });
     }
 
-    // Add audio controls for AI messages
-    if (sender === 'ai' && audioText) {
-        const audioControls = document.createElement('div');
-        audioControls.className = 'message-audio-controls';
-        audioControls.innerHTML = `
-            <button class="audio-play-btn" data-text="${audioText.replace(/"/g, '&quot;')}">
-                <i class="fas fa-play"></i>
-                <span>Play Audio</span>
-            </button>
-            <audio class="message-audio" preload="none"></audio>
-        `;
-        content.appendChild(audioControls);
-        
-        // Add event listener to the audio button
-        const audioBtn = audioControls.querySelector('.audio-play-btn');
-        audioBtn.addEventListener('click', function() {
-            const text = this.getAttribute('data-text');
-            playTextToSpeech(text, this);
-        });
-    }
+    initSpeechRecognition() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            this.recognition = new SpeechRecognition();
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+            this.recognition.lang = 'en-US';
 
-    const timestamp = document.createElement('div');
-    timestamp.className = 'message-timestamp';
-    timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            this.recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                this.chatInput.value = transcript;
+            };
 
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(content);
-    messageDiv.appendChild(timestamp);
+            this.recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                this.showNotification('Speech recognition error: ' + event.error, 'error');
+                this.stopVoiceRecording();
+            };
 
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    
-    return messageDiv;
-}
-
-function showTypingIndicator() {
-    const chatMessages = document.getElementById('chat-messages');
-    const typingIndicator = document.createElement('div');
-    typingIndicator.className = 'message ai-message typing-indicator';
-    typingIndicator.innerHTML = `
-        <div class="message-avatar">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div class="message-content">
-            <div class="typing-dots">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            </div>
-        </div>
-    `;
-    chatMessages.appendChild(typingIndicator);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return typingIndicator;
-}
-
-// Voice Recording Functionality with Real-time Speech Recognition
-function initializeVoiceRecording() {
-    const voiceRecordBtn = document.getElementById('voice-record');
-    const widgetVoiceRecord = document.getElementById('widget-voice-record');
-    const stopRecordingBtn = document.getElementById('stop-recording');
-    const voiceStatus = document.getElementById('voice-status');
-    const voiceStatusText = voiceStatus.querySelector('span');
-
-    let recognition = null;
-    let isRecording = false;
-    let finalTranscript = '';
-    let currentContext = '';
-
-    // Check if speech recognition is available
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        voiceRecordBtn.style.display = 'none';
-        widgetVoiceRecord.style.display = 'none';
-        console.warn('Speech recognition not supported in this browser');
-        return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    voiceRecordBtn.addEventListener('click', function() {
-        toggleVoiceRecording('main');
-    });
-
-    widgetVoiceRecord.addEventListener('click', function() {
-        toggleVoiceRecording('widget');
-    });
-
-    stopRecordingBtn.addEventListener('click', stopRecording);
-
-    function initializeRecognition() {
-        recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-
-        recognition.onstart = function() {
-            console.log('Speech recognition started');
-            isRecording = true;
-            finalTranscript = '';
-            updateUIForRecording(true);
-        };
-
-        recognition.onresult = function(event) {
-            let interimTranscript = '';
-            
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
-                } else {
-                    interimTranscript += transcript;
+            this.recognition.onend = () => {
+                if (this.isRecording) {
+                    this.stopVoiceRecording();
                 }
-            }
-
-            // Update the input field in real-time with interim results
-            updateInputWithTranscript(finalTranscript + interimTranscript);
-            
-            // Update status text with current transcription
-            if (interimTranscript) {
-                voiceStatusText.textContent = `Listening... "${interimTranscript}"`;
-            } else if (finalTranscript) {
-                voiceStatusText.textContent = `Listening... Ready for more`;
-            }
-        };
-
-        recognition.onerror = function(event) {
-            console.error('Speech recognition error:', event.error);
-            if (event.error === 'not-allowed') {
-                showNotification('Microphone access denied. Please allow microphone permissions in your browser settings.', 'error');
-            } else if (event.error === 'no-speech') {
-                showNotification('No speech detected. Please try speaking again.', 'warning');
-            } else {
-                showNotification('Speech recognition error: ' + event.error, 'error');
-            }
-            stopRecording();
-        };
-
-        recognition.onend = function() {
-            console.log('Speech recognition ended');
-            if (isRecording) {
-                // Automatically restart recognition if we're still supposed to be recording
-                recognition.start();
-            } else {
-                processFinalTranscript();
-            }
-        };
-    }
-
-    function toggleVoiceRecording(context) {
-        if (isRecording) {
-            stopRecording();
+            };
         } else {
-            startRecording(context);
+            this.voiceButton.style.display = 'none';
+            console.warn('Speech recognition not supported in this browser');
         }
     }
 
-    function startRecording(context) {
-        currentContext = context;
-        
-        if (!recognition) {
-            initializeRecognition();
-        }
-
-        try {
-            recognition.start();
-            showNotification('Speech recognition started. Speak now!', 'info');
-        } catch (error) {
-            console.error('Error starting speech recognition:', error);
-            showNotification('Error starting speech recognition. Please try again.', 'error');
-        }
-    }
-
-    function stopRecording() {
-        if (recognition && isRecording) {
-            isRecording = false;
-            recognition.stop();
-            updateUIForRecording(false);
-            showNotification('Speech recognition stopped.', 'info');
-        }
-    }
-
-    function updateUIForRecording(recording) {
-        if (currentContext === 'main') {
-            voiceRecordBtn.classList.toggle('recording', recording);
-            voiceStatus.classList.toggle('active', recording);
-            if (!recording) {
-                voiceStatusText.textContent = 'Listening... Speak now';
-            }
+    toggleVoiceRecording() {
+        if (this.isRecording) {
+            this.stopVoiceRecording();
         } else {
-            widgetVoiceRecord.classList.toggle('recording', recording);
+            this.startVoiceRecording();
         }
     }
 
-    function updateInputWithTranscript(transcript) {
-        const trimmedTranscript = transcript.trim();
-        if (currentContext === 'main') {
-            document.getElementById('chat-input').value = trimmedTranscript;
-        } else {
-            document.getElementById('ai-input').value = trimmedTranscript;
+    startVoiceRecording() {
+        if (this.recognition) {
+            this.recognition.start();
+            this.isRecording = true;
+            this.voiceButton.classList.add('recording');
+            this.voiceStatus.classList.add('active');
+            this.showNotification('Listening... Speak now', 'info');
         }
     }
 
-    function processFinalTranscript() {
-        if (finalTranscript.trim()) {
-            // Auto-send the message if we have substantial content
-            if (finalTranscript.split(' ').length >= 2) {
-                if (currentContext === 'main') {
-                    setTimeout(() => {
-                        sendChatMessage();
-                    }, 500);
-                } else {
-                    setTimeout(() => {
-                        sendWidgetMessage();
-                    }, 500);
-                }
-            }
+    stopVoiceRecording() {
+        if (this.recognition && this.isRecording) {
+            this.recognition.stop();
+            this.isRecording = false;
+            this.voiceButton.classList.remove('recording');
+            this.voiceStatus.classList.remove('active');
         }
-        finalTranscript = '';
     }
 
-    // Add keyboard shortcut for voice recording (Ctrl+Space)
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.code === 'Space') {
-            e.preventDefault();
-            toggleVoiceRecording('main');
+    sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (message) {
+            this.addUserMessage(message);
+            this.generateAIResponse(message);
+            this.chatInput.value = '';
         }
-    });
-}
-
-// Enhanced AI Message Processing with API Integration - MAIN CHAT
-async function processAIMessage(message, typingIndicator) {
-    try {
-        // Try to use the Gemini API
-        const response = await callGeminiAPI(message, 'Personal Financial Advisor consultation');
-        
-        // Remove typing indicator
-        if (typingIndicator && typingIndicator.parentNode) {
-            typingIndicator.remove();
-        }
-        
-        // Add AI response with audio controls
-        addMessageToChat('ai', response, response);
-
-    } catch (error) {
-        console.error('AI processing error:', error);
-        
-        // Remove typing indicator
-        if (typingIndicator && typingIndicator.parentNode) {
-            typingIndicator.remove();
-        }
-        
-        // Show fallback response with audio controls
-        const fallbackResponse = getAIResponse(message);
-        addMessageToChat('ai', fallbackResponse, fallbackResponse);
     }
-}
 
-// Widget AI Message Processing
-async function processWidgetAIMessage(message, typingIndicator) {
-    try {
-        // Try to use the Gemini API
-        const response = await callGeminiAPI(message, 'AI Widget consultation');
-        
-        // Remove typing indicator
-        if (typingIndicator && typingIndicator.parentNode) {
-            typingIndicator.remove();
-        }
-        
-        // Add AI response to widget with audio controls
-        const aiMessages = document.getElementById('ai-messages');
-        const aiResponse = document.createElement('div');
-        aiResponse.className = 'ai-message';
-        aiResponse.innerHTML = `
-            <p>${response}</p>
-            <div class="message-audio-controls">
-                <button class="audio-play-btn" data-text="${response.replace(/"/g, '&quot;')}">
+    addUserMessage(message) {
+        const messageElement = this.createMessageElement(message, 'user');
+        this.chatMessages.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+
+    addAIMessage(message) {
+        const messageElement = this.createMessageElement(message, 'ai');
+        this.chatMessages.appendChild(messageElement);
+        this.scrollToBottom();
+        return messageElement;
+    }
+
+    createMessageElement(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}-message`;
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'message-avatar';
+        avatarDiv.innerHTML = type === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+
+        // Convert line breaks and format the message
+        const formattedMessage = this.formatMessage(message);
+        contentDiv.innerHTML = formattedMessage;
+
+        // Add audio controls for AI messages
+        if (type === 'ai') {
+            const audioControls = document.createElement('div');
+            audioControls.className = 'message-audio-controls';
+            audioControls.innerHTML = `
+                <button class="audio-play-btn" data-text="${message.replace(/"/g, '&quot;')}">
                     <i class="fas fa-play"></i>
+                    <span>Play Audio</span>
                 </button>
                 <audio class="message-audio" preload="none"></audio>
-            </div>
-        `;
-        aiMessages.appendChild(aiResponse);
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-        
-        // Add event listener to the audio button
-        const audioBtn = aiResponse.querySelector('.audio-play-btn');
-        audioBtn.addEventListener('click', function() {
-            const text = this.getAttribute('data-text');
-            playTextToSpeech(text, this);
-        });
-
-    } catch (error) {
-        console.error('Widget AI processing error:', error);
-        
-        // Remove typing indicator
-        if (typingIndicator && typingIndicator.parentNode) {
-            typingIndicator.remove();
+            `;
+            contentDiv.appendChild(audioControls);
         }
-        
-        // Show fallback response in widget with audio controls
-        const fallbackResponse = getAIResponse(message);
-        const aiMessages = document.getElementById('ai-messages');
-        const aiResponse = document.createElement('div');
-        aiResponse.className = 'ai-message';
-        aiResponse.innerHTML = `
-            <p>${fallbackResponse}</p>
-            <div class="message-audio-controls">
-                <button class="audio-play-btn" data-text="${fallbackResponse.replace(/"/g, '&quot;')}">
-                    <i class="fas fa-play"></i>
-                </button>
-                <audio class="message-audio" preload="none"></audio>
-            </div>
-        `;
-        aiMessages.appendChild(aiResponse);
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-        
-        // Add event listener to the audio button
-        const audioBtn = aiResponse.querySelector('.audio-play-btn');
-        audioBtn.addEventListener('click', function() {
-            const text = this.getAttribute('data-text');
-            playTextToSpeech(text, this);
-        });
+
+        const timestampDiv = document.createElement('div');
+        timestampDiv.className = 'message-timestamp';
+        timestampDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+        messageDiv.appendChild(timestampDiv);
+
+        return messageDiv;
     }
-}
 
-// Text-to-Speech Functionality
-async function playTextToSpeech(text, buttonElement) {
-    try {
-        // Show loading state
-        if (buttonElement) {
-            buttonElement.classList.add('playing');
-            buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Generating Audio...</span>';
-            buttonElement.disabled = true;
-        }
+    formatMessage(message) {
+        // Convert line breaks to <br> tags
+        let formatted = message.replace(/\n/g, '<br>');
         
-        showNotification('Generating audio response...', 'info');
+        // Convert URLs to clickable links
+        formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: var(--accent-color);">$1</a>');
         
-        // Call text-to-speech API
-        const audioUrl = await convertTextToSpeech(text);
+        // Convert *bold* text to <strong>
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
         
-        if (audioUrl) {
-            // Play audio using global audio player
-            playAudioInGlobalPlayer(audioUrl, text);
+        return `<p>${formatted}</p>`;
+    }
+
+    generateAIResponse(userMessage) {
+        // Simulate AI thinking delay
+        setTimeout(() => {
+            const responses = this.getAIResponses(userMessage);
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            const messageElement = this.addAIMessage(response);
             
-            if (buttonElement) {
-                buttonElement.innerHTML = '<i class="fas fa-stop"></i><span>Stop Audio</span>';
-                buttonElement.disabled = false;
+            // Auto-play audio for AI responses
+            const audioBtn = messageElement.querySelector('.audio-play-btn');
+            if (audioBtn) {
+                setTimeout(() => this.handleAudioPlay(audioBtn), 500);
             }
-        }
-    } catch (error) {
-        console.error('Text-to-speech error:', error);
-        showNotification('Error generating audio. Please try again.', 'error');
+        }, 1000 + Math.random() * 2000);
+    }
+
+    getAIResponses(userMessage) {
+        const lowerMessage = userMessage.toLowerCase();
         
-        if (buttonElement) {
-            buttonElement.classList.remove('playing');
-            buttonElement.innerHTML = '<i class="fas fa-play"></i><span>Play Audio</span>';
-            buttonElement.disabled = false;
+        if (lowerMessage.includes('invest') || lowerMessage.includes('portfolio')) {
+            return [
+                `Based on your current financial situation, I recommend a diversified portfolio with 60% in low-cost index funds, 30% in bonds, and 10% in emerging markets. This balances growth potential with risk management.`,
+                `For medium-term growth with R10,000, consider a mix of 50% equity ETFs, 30% government bonds, and 20% in high-quality dividend stocks. Remember to review your portfolio quarterly.`,
+                `Investment strategy should align with your risk tolerance. If you're conservative, focus on 70% fixed income and 30% blue-chip stocks. For aggressive growth, consider 80% equities with international exposure.`
+            ];
+        } else if (lowerMessage.includes('budget') || lowerMessage.includes('saving')) {
+            return [
+                `A good budgeting rule is the 50/30/20 method: 50% for needs, 30% for wants, and 20% for savings/debt repayment. I can help you create a personalized budget based on your income.`,
+                `To improve your savings, track your expenses for 30 days, identify unnecessary spending, and automate your savings transfers. Even small amounts add up through compound interest.`,
+                `Budget planning starts with understanding your cash flow. List all income sources and categorize expenses. Aim to save at least 15-20% of your income for long-term financial security.`
+            ];
+        } else if (lowerMessage.includes('fraud') || lowerMessage.includes('security')) {
+            return [
+                `Recent phishing scams involve fake bank alerts and COVID-19 relief offers. Always verify sender addresses and never click suspicious links. Enable two-factor authentication on all accounts.`,
+                `To protect against fraud: monitor accounts weekly, use unique passwords, enable transaction alerts, and freeze your credit when not applying for loans. Report suspicious activity immediately.`,
+                `Security best practices include using a password manager, avoiding public Wi-Fi for financial transactions, and regularly checking your credit report for unauthorized accounts.`
+            ];
+        } else if (lowerMessage.includes('interest') || lowerMessage.includes('loan')) {
+            return [
+                `Compound interest is interest calculated on the initial principal and also on the accumulated interest. It's powerful for savings but dangerous for debt. The formula is A = P(1 + r/n)^(nt).`,
+                `When comparing loans, look beyond the interest rate to the APR (Annual Percentage Rate), which includes fees. For savings, compound interest works best with regular contributions and time.`,
+                `Understanding interest rates is crucial. Fixed rates stay the same; variable rates change. For borrowing, fixed rates provide predictability. For saving, higher compounding frequency yields better returns.`
+            ];
+        } else {
+            return [
+                `I understand you're asking about "${userMessage}". As your financial advisor, I recommend consulting with a certified professional for personalized advice on complex matters.`,
+                `That's an interesting question about ${userMessage.split(' ').slice(0, 3).join(' ')}. For detailed guidance, I suggest reviewing your financial goals and current situation together.`,
+                `Thank you for your question. To provide the most accurate advice, I'd need more context about your financial objectives and risk tolerance. Would you like to discuss this further?`,
+                `I'm here to help with financial guidance. For specific questions like this, it's best to consider your overall financial plan. Would you like me to explain any particular concept in more detail?`
+            ];
         }
     }
-}
 
-async function convertTextToSpeech(text) {
-    try {
-        const response = await fetch('/api/text-to-speech', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                text: text,
-                voice: 'en-US-1', // Default voice
-                speed: 1.0 // Normal speed
-            })
-        });
+    async handleAudioPlay(button) {
+        const text = button.getAttribute('data-text');
+        const audioElement = button.nextElementSibling;
+        const icon = button.querySelector('i');
 
-        if (!response.ok) {
-            throw new Error('Text-to-speech API error');
-        }
-
-        const data = await response.json();
-        return data.audioUrl || data.audio_url;
-    } catch (error) {
-        console.error('Text-to-speech API error:', error);
-        
-        // Fallback: Use browser's SpeechSynthesis API
-        return await fallbackTextToSpeech(text);
-    }
-}
-
-function fallbackTextToSpeech(text) {
-    return new Promise((resolve) => {
-        if (!('speechSynthesis' in window)) {
-            showNotification('Text-to-speech not supported in this browser.', 'warning');
-            resolve(null);
+        if (audioElement.src && !audioElement.ended) {
+            // Audio is playing, pause it
+            audioElement.pause();
+            audioElement.currentTime = 0;
+            icon.classList.remove('fa-pause');
+            icon.classList.add('fa-play');
+            button.classList.remove('playing');
             return;
         }
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.8;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        
-        utterance.onend = function() {
-            resolve('browser_synthesis');
-        };
-        
-        utterance.onerror = function() {
-            showNotification('Browser text-to-speech failed.', 'error');
-            resolve(null);
-        };
-        
-        speechSynthesis.speak(utterance);
-    });
+        try {
+            button.classList.add('playing');
+            icon.classList.remove('fa-play');
+            icon.classList.add('fa-spinner', 'fa-spin');
+
+            // Use the Web Speech API for text-to-speech
+            if ('speechSynthesis' in window) {
+                // Stop any ongoing speech
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 0.8;
+
+                utterance.onstart = () => {
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    icon.classList.add('fa-pause');
+                };
+
+                utterance.onend = () => {
+                    button.classList.remove('playing');
+                    icon.classList.remove('fa-pause');
+                    icon.classList.add('fa-play');
+                };
+
+                utterance.onerror = () => {
+                    button.classList.remove('playing');
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    icon.classList.add('fa-play');
+                    this.showNotification('Audio playback failed', 'error');
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                throw new Error('Text-to-speech not supported');
+            }
+        } catch (error) {
+            console.error('Audio playback error:', error);
+            button.classList.remove('playing');
+            icon.classList.remove('fa-spinner', 'fa-spin');
+            icon.classList.add('fa-play');
+            this.showNotification('Audio playback not available', 'error');
+        }
+    }
+
+    scrollToBottom() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 1100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 300px;
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100px)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
 }
 
-// Global Audio Player functionality
-function initializeAudioPlayer() {
-    const globalAudioPlayer = document.getElementById('global-audio-player');
-    const closeAudioBtn = document.getElementById('close-audio-player');
-    const playPauseBtn = document.getElementById('play-pause-audio');
-    const stopBtn = document.getElementById('stop-audio');
-    const downloadBtn = document.getElementById('download-audio');
-    const globalAudio = document.getElementById('global-audio');
+// AI Widget Manager
+class AIWidgetManager {
+    constructor() {
+        this.widget = document.getElementById('ai-widget');
+        this.fab = document.getElementById('ai-fab');
+        this.closeButton = document.getElementById('close-ai-widget');
+        this.aiInput = document.getElementById('ai-input');
+        this.sendButton = document.getElementById('send-ai-message');
+        this.voiceButton = document.getElementById('widget-voice-record');
+        this.aiMessages = document.getElementById('ai-messages');
+        this.init();
+    }
 
-    closeAudioBtn.addEventListener('click', function() {
-        globalAudioPlayer.classList.remove('active');
-        globalAudio.pause();
-        globalAudio.currentTime = 0;
-    });
+    init() {
+        this.setupEventListeners();
+    }
 
-    playPauseBtn.addEventListener('click', function() {
-        if (globalAudio.paused) {
-            globalAudio.play();
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    setupEventListeners() {
+        this.fab.addEventListener('click', () => this.toggleWidget());
+        this.closeButton.addEventListener('click', () => this.hideWidget());
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.aiInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+
+        this.voiceButton.addEventListener('click', () => this.toggleVoiceRecording());
+    }
+
+    toggleWidget() {
+        if (this.widget.classList.contains('active')) {
+            this.hideWidget();
         } else {
-            globalAudio.pause();
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            this.showWidget();
         }
-    });
+    }
 
-    stopBtn.addEventListener('click', function() {
-        globalAudio.pause();
-        globalAudio.currentTime = 0;
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-    });
+    showWidget() {
+        this.widget.classList.add('active');
+        this.fab.style.opacity = '0';
+        setTimeout(() => {
+            this.aiInput.focus();
+        }, 300);
+    }
 
-    downloadBtn.addEventListener('click', function() {
-        if (globalAudio.src) {
+    hideWidget() {
+        this.widget.classList.remove('active');
+        this.fab.style.opacity = '1';
+    }
+
+    sendMessage() {
+        const message = this.aiInput.value.trim();
+        if (message) {
+            this.addMessage(message, 'user');
+            this.generateResponse(message);
+            this.aiInput.value = '';
+        }
+    }
+
+    addMessage(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = type === 'user' ? 'user-message-widget' : 'ai-message';
+        messageDiv.textContent = message;
+        this.aiMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+
+    generateResponse(userMessage) {
+        setTimeout(() => {
+            const responses = [
+                "I can help with that! For detailed analysis, please use the main chat interface.",
+                "That's a great question! The full advisor can provide more comprehensive guidance.",
+                "I recommend discussing this in the main chat for personalized advice.",
+                "For security and detailed financial advice, please use the complete advisor feature."
+            ];
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            this.addMessage(response, 'ai');
+        }, 1000);
+    }
+
+    toggleVoiceRecording() {
+        // Simplified voice recording for widget
+        this.showNotification('Voice feature available in main chat', 'info');
+    }
+
+    scrollToBottom() {
+        this.aiMessages.scrollTop = this.aiMessages.scrollHeight;
+    }
+
+    showNotification(message, type) {
+        // Reuse the notification system from ChatManager
+        const chatManager = window.chatManager;
+        if (chatManager && chatManager.showNotification) {
+            chatManager.showNotification(message, type);
+        }
+    }
+}
+
+// Sidebar Manager
+class SidebarManager {
+    constructor() {
+        this.sidebar = document.getElementById('sidebar');
+        this.toggleButton = document.getElementById('sidebar-toggle');
+        this.init();
+    }
+
+    init() {
+        this.toggleButton.addEventListener('click', () => this.toggleSidebar());
+        
+        // Close sidebar when clicking on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !this.sidebar.contains(e.target) && 
+                !e.target.closest('.sidebar-toggle')) {
+                this.sidebar.classList.add('collapsed');
+            }
+        });
+    }
+
+    toggleSidebar() {
+        this.sidebar.classList.toggle('collapsed');
+    }
+}
+
+// Global Audio Player Manager
+class AudioPlayerManager {
+    constructor() {
+        this.player = document.getElementById('global-audio-player');
+        this.audioElement = document.getElementById('global-audio');
+        this.closeButton = document.getElementById('close-audio-player');
+        this.playPauseButton = document.getElementById('play-pause-audio');
+        this.stopButton = document.getElementById('stop-audio');
+        this.downloadButton = document.getElementById('download-audio');
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.closeButton.addEventListener('click', () => this.hide());
+        this.playPauseButton.addEventListener('click', () => this.togglePlayPause());
+        this.stopButton.addEventListener('click', () => this.stop());
+        this.downloadButton.addEventListener('click', () => this.download());
+
+        this.audioElement.addEventListener('play', () => this.updatePlayPauseButton(true));
+        this.audioElement.addEventListener('pause', () => this.updatePlayPauseButton(false));
+        this.audioElement.addEventListener('ended', () => this.updatePlayPauseButton(false));
+    }
+
+    playAudio(audioUrl, title = 'AI Response') {
+        this.audioElement.src = audioUrl;
+        this.audioElement.play();
+        this.player.classList.add('active');
+        this.updateAudioInfo(title);
+    }
+
+    togglePlayPause() {
+        if (this.audioElement.paused) {
+            this.audioElement.play();
+        } else {
+            this.audioElement.pause();
+        }
+    }
+
+    stop() {
+        this.audioElement.pause();
+        this.audioElement.currentTime = 0;
+        this.updatePlayPauseButton(false);
+    }
+
+    download() {
+        if (this.audioElement.src) {
             const a = document.createElement('a');
-            a.href = globalAudio.src;
+            a.href = this.audioElement.src;
             a.download = 'ai-response.mp3';
             a.click();
         }
-    });
-
-    globalAudio.addEventListener('ended', function() {
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-    });
-}
-
-function playAudioInGlobalPlayer(audioUrl, text) {
-    const globalAudioPlayer = document.getElementById('global-audio-player');
-    const globalAudio = document.getElementById('global-audio');
-    const playPauseBtn = document.getElementById('play-pause-audio');
-
-    if (audioUrl === 'browser_synthesis') {
-        // Browser synthesis is already playing
-        return;
     }
 
-    globalAudio.src = audioUrl;
-    globalAudioPlayer.classList.add('active');
-    
-    globalAudio.onloadeddata = function() {
-        globalAudio.play();
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        showNotification('Playing audio response...', 'success');
-    };
-    
-    globalAudio.onerror = function() {
-        showNotification('Error playing audio.', 'error');
-        globalAudioPlayer.classList.remove('active');
-    };
+    hide() {
+        this.player.classList.remove('active');
+        this.stop();
+    }
+
+    updatePlayPauseButton(playing) {
+        const icon = this.playPauseButton.querySelector('i');
+        icon.classList.toggle('fa-play', !playing);
+        icon.classList.toggle('fa-pause', playing);
+    }
+
+    updateAudioInfo(title) {
+        const audioInfo = this.player.querySelector('.audio-info span');
+        audioInfo.textContent = title;
+    }
 }
 
-// API call function to connect to Gemini
-async function callGeminiAPI(message, context) {
-    try {
-        console.log('Sending message to Gemini API:', message);
-        
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: message,
-                context: context
-            })
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize managers
+    window.themeManager = new ThemeManager();
+    window.chatManager = new ChatManager();
+    window.aiWidgetManager = new AIWidgetManager();
+    window.sidebarManager = new SidebarManager();
+    window.audioPlayerManager = new AudioPlayerManager();
+
+    // Make logo clickable to redirect to landing page
+    const navBrand = document.querySelector('.nav-brand');
+    if (navBrand) {
+        navBrand.addEventListener('click', function() {
+            window.location.href = 'landing.html';
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Received response from Gemini API:', data);
-
-        return data.message || 'I apologize, but I couldn\'t process your request right now.';
-    } catch (error) {
-        console.error('Error calling Gemini API:', error);
-        throw error;
     }
-}
 
-// AI Response Generator (Fallback)
-function getAIResponse(message) {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('invest') || lowerMessage.includes('portfolio') || lowerMessage.includes('stock')) {
-        return `Based on your question about investments, I recommend considering a diversified portfolio. For medium-term growth (3-5 years), a balanced approach with 60% equities, 30% bonds, and 10% alternative investments could be suitable. Remember to consider your risk tolerance and investment timeline.\n\nKey principles:\n• Diversify across asset classes\n• Consider low-cost index funds\n• Regular contributions (dollar-cost averaging)\n• Long-term perspective`;
-    } else if (lowerMessage.includes('budget') || lowerMessage.includes('saving') || lowerMessage.includes('expense')) {
-        return `For effective budgeting, I suggest the 50/30/20 rule:\n\n50% for Needs:\n• Housing, utilities, groceries\n• Transportation, insurance\n• Minimum debt payments\n\n30% for Wants:\n• Dining out, entertainment\n• Travel, hobbies\n• Non-essential purchases\n\n20% for Savings & Debt:\n• Emergency fund\n• Retirement accounts\n• Extra debt payments\n\nStart by tracking your expenses for a month to understand your spending patterns.`;
-    } else if (lowerMessage.includes('fraud') || lowerMessage.includes('scam') || lowerMessage.includes('security') || lowerMessage.includes('phishing')) {
-        return `To protect yourself from financial fraud:\n\n🔒 Security Best Practices:\n• Use strong, unique passwords for each account\n• Enable two-factor authentication everywhere\n• Monitor accounts regularly for suspicious activity\n• Be cautious of phishing emails and suspicious links\n• Keep software and antivirus updated\n\n⚠️ Red Flags to Watch For:\n• Unexpected requests for personal information\n• Urgent or threatening language\n• Offers that seem too good to be true\n• Spelling and grammar errors in communications`;
-    } else if (lowerMessage.includes('interest') || lowerMessage.includes('compound')) {
-        return `Compound interest is often called the "eighth wonder of the world." Here's how it works:\n\n📈 Compound Interest Explained:\n• Interest calculated on initial principal + accumulated interest\n• Earnings generate their own earnings over time\n• Powerful long-term growth effect\n\n💡 Example: Investing R1,000 at 8% annual return:\nYear 1: R1,080\nYear 5: R1,469\nYear 10: R2,159\nYear 20: R4,661\n\nThe key is starting early and staying consistent!`;
-    } else if (lowerMessage.includes('emergency') || lowerMessage.includes('fund')) {
-        return `Emergency funds are crucial for financial security:\n\n💰 Recommended Guidelines:\n• 3-6 months of essential living expenses\n• Keep in easily accessible account (savings account)\n• Only use for genuine emergencies\n• Replenish after use\n\n🎯 Essential Expenses to Cover:\n• Housing (rent/mortgage)\n• Utilities and insurance\n• Groceries and essential medications\n• Minimum debt payments\n\nStart small and build gradually - even R1,000 can cover minor emergencies!`;
-    } else {
-        return `Thank you for your question! I'm here to help with your financial needs.\n\nBased on your message about "${message}", here are some areas I can assist with:\n\n• Investment planning and portfolio management\n• Budget creation and expense tracking\n• Debt management strategies\n• Retirement planning\n• Financial security and fraud prevention\n• General financial education\n\nCould you provide more specific details about what you'd like to achieve? This will help me give you the most relevant advice.`;
-    }
-}
-
-// Search Functionality
-function initializeSearch() {
-    const searchInput = document.getElementById('global-search');
-    
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const query = this.value.trim();
-            if (query) {
-                performSearch(query);
-            }
-        }
-    });
-}
-
-function performSearch(query) {
-    showNotification(`Searching for: ${query}`);
-    console.log('Search query:', query);
-}
-
-// Utility Functions
-function showNotification(message, type = 'info') {
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => notification.remove());
-
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas fa-${getNotificationIcon(type)}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    if (!document.querySelector('#notification-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'notification-styles';
-        styles.textContent = `
-            .notification {
-                position: fixed;
-                top: 90px;
-                right: 20px;
-                background: rgba(30, 41, 59, 0.95);
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(34, 197, 94, 0.3);
-                border-radius: 8px;
-                padding: 1rem 1.5rem;
-                color: #e2e8f0;
-                z-index: 1100;
-                animation: slideInRight 0.3s ease-out;
-                max-width: 300px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            }
-            .notification-content {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-            }
-            .notification i {
-                color: #22c55e;
-            }
-            .notification-warning i {
-                color: #f59e0b;
-            }
-            .notification-error i {
-                color: #ef4444;
-            }
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(styles);
-    }
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideInRight 0.3s ease-in reverse';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-
-function getNotificationIcon(type) {
-    const icons = {
-        info: 'info-circle',
-        success: 'check-circle',
-        warning: 'exclamation-triangle',
-        error: 'exclamation-circle'
-    };
-    return icons[type] || 'info-circle';
-}
-
-// Error Handling
-window.addEventListener('error', function(e) {
-    console.error('Global error:', e.error);
-    showNotification('An unexpected error occurred. Please try again.', 'error');
+    console.log('Personal Advisor page initialized successfully!');
 });
 
-// Export functions for global access
-window.toggleVoiceRecording = function(context) {
-    const event = new Event('click');
-    if (context === 'main') {
-        document.getElementById('voice-record').dispatchEvent(event);
-    } else {
-        document.getElementById('widget-voice-record').dispatchEvent(event);
+// Handle page visibility change for audio
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Pause all audio when page is hidden
+        window.speechSynthesis.cancel();
+        const audios = document.querySelectorAll('audio');
+        audios.forEach(audio => audio.pause());
     }
-};
+});
