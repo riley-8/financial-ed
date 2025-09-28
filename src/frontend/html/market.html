@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Market - FinSecure</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/market.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>FinSecure</span>
+        </div>
+        
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search local businesses..." id="market-search">
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="nav-item points-display">
+                <i class="fas fa-coins"></i>
+                <span id="user-points">1,250</span>
+                <span>Points</span>
+            </div>
+            <div class="nav-item profile-dropdown">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" class="profile-img">
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown-menu">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="ai-advisor.html" class="nav-link">
+                <i class="fas fa-robot"></i>
+                <span>Personal Advisor</span>
+            </a>
+            <a href="statement-analyzer.html" class="nav-link">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Statement Analyzer</span>
+            </a>
+            <a href="fraud-scanner.html" class="nav-link">
+                <i class="fas fa-shield-virus"></i>
+                <span>Fraud Scanner</span>
+            </a>
+            <a href="security-center.html" class="nav-link">
+                <i class="fas fa-lock"></i>
+                <span>Security Center</span>
+            </a>
+            <a href="education.html" class="nav-link">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education Hub</span>
+            </a>
+            <a href="life-simulator.html" class="nav-link">
+                <i class="fas fa-gamepad"></i>
+                <span>Life Simulator</span>
+            </a>
+            <a href="challenges.html" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                <span>Challenges</span>
+            </a>
+            <a href="portfolio.html" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Portfolio</span>
+            </a>
+            <a href="market.html" class="nav-link active">
+                <i class="fas fa-store"></i>
+                <span>Local Market</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="content-section active">
+            <div class="section-header">
+                <h1>Local Market</h1>
+                <p>Redeem your challenge points for discounts at local businesses</p>
+            </div>
+
+            <!-- Points Overview -->
+            <div class="points-overview">
+                <div class="points-card">
+                    <div class="points-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="points-info">
+                        <h3 id="current-points">1,250</h3>
+                        <p>Available Points</p>
+                        <span class="points-value">1 point = R0.10 value</span>
+                    </div>
+                </div>
+                <div class="points-card">
+                    <div class="points-icon">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <div class="points-info">
+                        <h3>R155.00</h3>
+                        <p>Total Discount Value</p>
+                        <span class="points-value">Ready to redeem</span>
+                    </div>
+                </div>
+                <div class="points-card">
+                    <div class="points-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="points-info">
+                        <h3>5</h3>
+                        <p>Active Discounts</p>
+                        <span class="points-value">Currently available</span>
+                    </div>
+                </div>
+                <div class="points-card">
+                    <div class="points-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="points-info">
+                        <h3>12</h3>
+                        <p>Total Redeemed</p>
+                        <span class="points-value">All time savings</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Categories -->
+            <div class="market-categories">
+                <button class="category-btn active" data-category="all">All Businesses</button>
+                <button class="category-btn" data-category="food">Food & Dining</button>
+                <button class="category-btn" data-category="retail">Retail</button>
+                <button class="category-btn" data-category="services">Services</button>
+                <button class="category-btn" data-category="entertainment">Entertainment</button>
+                <button class="category-btn" data-category="featured">Featured</button>
+            </div>
+
+            <!-- Businesses Grid -->
+            <div class="businesses-grid">
+                <!-- Coffee Shop -->
+                <div class="business-card food" data-business-id="coffee-corner">
+                    <div class="business-header">
+                        <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300&h=200&fit=crop" alt="Coffee Corner" class="business-image">
+                        <div class="business-badge featured">Featured</div>
+                        <div class="distance-badge">0.5mi</div>
+                    </div>
+                    <div class="business-content">
+                        <h3>Coffee Corner</h3>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.7 (128 reviews)</span>
+                        </div>
+                        <p class="business-description">Artisanal coffee and pastries in a cozy atmosphere</p>
+                        <div class="discount-offer">
+                            <span class="discount-amount">15% OFF</span>
+                            <span class="points-cost">500 points</span>
+                        </div>
+                        <p class="discount-details">Valid on all drinks and pastries. Expires in 30 days.</p>
+                        <div class="business-meta">
+                            <span><i class="fas fa-clock"></i> Mon-Fri: 7AM-7PM</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 123 Main St</span>
+                        </div>
+                        <button class="redeem-btn" data-business="coffee-corner" data-points="500">
+                            Redeem Discount
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Book Store -->
+                <div class="business-card retail" data-business-id="book-nook">
+                    <div class="business-header">
+                        <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop" alt="Book Nook" class="business-image">
+                        <div class="distance-badge">0.8mi</div>
+                    </div>
+                    <div class="business-content">
+                        <h3>Book Nook</h3>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.9 (89 reviews)</span>
+                        </div>
+                        <p class="business-description">Independent bookstore with curated selections</p>
+                        <div class="discount-offer">
+                            <span class="discount-amount">20% OFF</span>
+                            <span class="points-cost">800 points</span>
+                        </div>
+                        <p class="discount-details">Valid on all books and merchandise. Expires in 45 days.</p>
+                        <div class="business-meta">
+                            <span><i class="fas fa-clock"></i> Mon-Sat: 9AM-9PM</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 456 Oak Ave</span>
+                        </div>
+                        <button class="redeem-btn" data-business="book-nook" data-points="800">
+                            Redeem Discount
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fitness Center -->
+                <div class="business-card services" data-business-id="fit-life">
+                    <div class="business-header">
+                        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&h=200&fit=crop" alt="Fit Life Gym" class="business-image">
+                        <div class="business-badge featured">Featured</div>
+                        <div class="distance-badge">1.2mi</div>
+                    </div>
+                    <div class="business-content">
+                        <h3>Fit Life Gym</h3>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.5 (234 reviews)</span>
+                        </div>
+                        <p class="business-description">Modern fitness center with premium equipment</p>
+                        <div class="discount-offer">
+                            <span class="discount-amount">1 Month FREE</span>
+                            <span class="points-cost">1500 points</span>
+                        </div>
+                        <p class="discount-details">Valid for new members. Includes all amenities.</p>
+                        <div class="business-meta">
+                            <span><i class="fas fa-clock"></i> 5AM-11PM Daily</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 789 Fitness Rd</span>
+                        </div>
+                        <button class="redeem-btn" data-business="fit-life" data-points="1500">
+                            Redeem Discount
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Restaurant -->
+                <div class="business-card food" data-business-id="pasta-paradise">
+                    <div class="business-header">
+                        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=300&h=200&fit=crop" alt="Pasta Paradise" class="business-image">
+                        <div class="distance-badge">0.3mi</div>
+                    </div>
+                    <div class="business-content">
+                        <h3>Pasta Paradise</h3>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.8 (156 reviews)</span>
+                        </div>
+                        <p class="business-description">Authentic Italian cuisine with fresh ingredients</p>
+                        <div class="discount-offer">
+                            <span class="discount-amount">25% OFF</span>
+                            <span class="points-cost">1000 points</span>
+                        </div>
+                        <p class="discount-details">Valid for parties up to 4. Excludes alcohol.</p>
+                        <div class="business-meta">
+                            <span><i class="fas fa-clock"></i> 11AM-10PM Daily</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 321 Italian Way</span>
+                        </div>
+                        <button class="redeem-btn" data-business="pasta-paradise" data-points="1000">
+                            Redeem Discount
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Movie Theater -->
+                <div class="business-card entertainment" data-business-id="cineplex">
+                    <div class="business-header">
+                        <img src="https://images.unsplash.com/photo-1489599809519-364a47ae3cde?w=300&h=200&fit=crop" alt="Cineplex" class="business-image">
+                        <div class="distance-badge">2.1mi</div>
+                    </div>
+                    <div class="business-content">
+                        <h3>Cineplex Theater</h3>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.3 (342 reviews)</span>
+                        </div>
+                        <p class="business-description">State-of-the-art movie experience with IMAX</p>
+                        <div class="discount-offer">
+                            <span class="discount-amount">2 Tickets + Popcorn</span>
+                            <span class="points-cost">1200 points</span>
+                        </div>
+                        <p class="discount-details">Valid any day except holidays. Includes regular popcorn.</p>
+                        <div class="business-meta">
+                            <span><i class="fas fa-clock"></i> 10AM-1AM Daily</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 555 Cinema Blvd</span>
+                        </div>
+                        <button class="redeem-btn" data-business="cineplex" data-points="1200">
+                            Redeem Discount
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hair Salon -->
+                <div class="business-card services" data-business-id="style-studio">
+                    <div class="business-header">
+                        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop" alt="Style Studio" class="business-image">
+                        <div class="distance-badge">0.7mi</div>
+                    </div>
+                    <div class="business-content">
+                        <h3>Style Studio</h3>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.9 (67 reviews)</span>
+                        </div>
+                        <p class="business-description">Premium hair and beauty services</p>
+                        <div class="discount-offer">
+                            <span class="discount-amount">30% OFF</span>
+                            <span class="points-cost">600 points</span>
+                        </div>
+                        <p class="discount-details">Valid on haircuts and styling. Expires in 60 days.</p>
+                        <div class="business-meta">
+                            <span><i class="fas fa-clock"></i> Tue-Sat: 9AM-7PM</span>
+                            <span><i class="fas fa-map-marker-alt"></i> 234 Beauty Ave</span>
+                        </div>
+                        <button class="redeem-btn" data-business="style-studio" data-points="600">
+                            Redeem Discount
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redeemed Discounts Section -->
+            <div class="discounts-section">
+                <h2>Your Active Discounts</h2>
+                <div class="discounts-grid">
+                    <div class="discount-card active">
+                        <div class="discount-header">
+                            <div class="discount-icon">
+                                <i class="fas fa-coffee"></i>
+                            </div>
+                            <div class="discount-status active">Active</div>
+                        </div>
+                        <h4>Coffee Corner - 15% OFF</h4>
+                        <p class="discount-code">Code: FIN15COFFEE</p>
+                        <div class="discount-expiry">
+                            <i class="fas fa-clock"></i>
+                            <span>Expires: Dec 15, 2024</span>
+                        </div>
+                        <button class="use-discount-btn">Use Now</button>
+                    </div>
+
+                    <div class="discount-card active">
+                        <div class="discount-header">
+                            <div class="discount-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="discount-status active">Active</div>
+                        </div>
+                        <h4>Book Nook - 20% OFF</h4>
+                        <p class="discount-code">Code: FIN20BOOKS</p>
+                        <div class="discount-expiry">
+                            <i class="fas fa-clock"></i>
+                            <span>Expires: Jan 5, 2025</span>
+                        </div>
+                        <button class="use-discount-btn">Use Now</button>
+                    </div>
+
+                    <div class="discount-card expired">
+                        <div class="discount-header">
+                            <div class="discount-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="discount-status expired">Expired</div>
+                        </div>
+                        <h4>Pasta Paradise - 25% OFF</h4>
+                        <p class="discount-code">Code: FIN25PASTA</p>
+                        <div class="discount-expiry">
+                            <i class="fas fa-clock"></i>
+                            <span>Expired: Nov 20, 2024</span>
+                        </div>
+                        <button class="use-discount-btn" disabled>Expired</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Redeem Modal -->
+    <div class="modal" id="redeem-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Redeem Discount</h3>
+                <button class="modal-close" id="close-redeem-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="redeem-details">
+                    <h4 id="redeem-business-name">Business Name</h4>
+                    <p id="redeem-offer">Discount Offer</p>
+                    <div class="points-cost-display">
+                        <i class="fas fa-coins"></i>
+                        <span id="redeem-points-cost">0 points</span>
+                    </div>
+                    <div class="current-points">
+                        Your points: <span id="modal-current-points">1,250</span>
+                    </div>
+                    <div class="points-after">
+                        Points after redemption: <span id="points-after">1,250</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-redeem">Cancel</button>
+                <button class="btn btn-primary" id="confirm-redeem">Confirm Redemption</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Redemption Successful!</h3>
+                <button class="modal-close" id="close-success-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-content">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Discount Activated!</h4>
+                    <p id="success-message">Your discount code has been generated and added to your active discounts.</p>
+                    <div class="discount-code-display">
+                        <span id="generated-code">FIN15COFFEE</span>
+                        <button class="btn-copy" id="copy-code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="close-success">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Widget (Floating) -->
+    <div class="ai-widget-floating" id="ai-widget">
+        <div class="ai-widget-header">
+            <i class="fas fa-robot"></i>
+            <span>Market Assistant</span>
+            <button class="widget-close" id="close-ai-widget">×</button>
+        </div>
+        <div class="ai-widget-content">
+            <div class="ai-messages" id="ai-messages">
+                <div class="ai-message">
+                    <p>Ready to redeem your points? I can help you find the best local deals!</p>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" id="ai-input" placeholder="Ask about discounts...">
+                <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for AI Widget -->
+    <button class="ai-fab" id="ai-fab">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <script src="../js/market.js"></script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+/* Market Specific Styles */
+.points-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.points-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.points-card:hover {
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+}
+
+.points-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.points-info h3 {
+    color: #f8fafc;
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.points-info p {
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.points-value {
+    color: #22c55e;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Market Categories */
+.market-categories {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    color: #94a3b8;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn.active,
+.category-btn:hover {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border-color: transparent;
+}
+
+/* Businesses Grid */
+.businesses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.business-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.business-card:hover {
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.business-header {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.business-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.business-card:hover .business-image {
+    transform: scale(1.05);
+}
+
+.business-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.business-badge.featured {
+    background: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+.distance-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.business-content {
+    padding: 1.5rem;
+}
+
+.business-content h3 {
+    color: #f8fafc;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.business-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: #f59e0b;
+    font-size: 0.875rem;
+}
+
+.business-description {
+    color: #94a3b8;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.discount-offer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.discount-amount {
+    color: #22c55e;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.points-cost {
+    color: #f59e0b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.points-cost::before {
+    content: '•';
+    margin-right: 0.25rem;
+}
+
+.discount-details {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.business-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.business-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.redeem-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.redeem-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+}
+
+.redeem-btn:disabled {
+    background: #64748b;
+    cursor: not-allowed;
+}
+
+/* Discounts Section */
+.discounts-section {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.discounts-section h2 {
+    color: #f8fafc;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.discounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.discount-card {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.discount-card:hover {
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+}
+
+.discount-card.expired {
+    opacity: 0.6;
+    border-color: rgba(239, 68, 68, 0.1);
+}
+
+.discount-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.discount-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #22c55e;
+}
+
+.discount-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.discount-status.active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.discount-status.expired {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.discount-card h4 {
+    color: #f8fafc;
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+}
+
+.discount-code {
+    color: #22c55e;
+    font-family: monospace;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 4px;
+}
+
+.discount-expiry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.use-discount-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: #22c55e;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.use-discount-btn:hover:not(:disabled) {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.use-discount-btn:disabled {
+    border-color: #64748b;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+/* Modal Styles for Market */
+.points-cost-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.points-cost-display i {
+    color: #f59e0b;
+    font-size: 1.25rem;
+}
+
+.points-cost-display span {
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+.current-points,
+.points-after {
+    margin: 0.5rem 0;
+    color: #94a3b8;
+}
+
+.points-after {
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.success-content {
+    text-align: center;
+    padding: 1rem;
+}
+
+.success-content i {
+    font-size: 4rem;
+    color: #22c55e;
+    margin-bottom: 1rem;
+}
+
+.success-content h4 {
+    color: #f8fafc;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.discount-code-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.discount-code-display span {
+    font-family: monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #22c55e;
+}
+
+.btn-copy {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 6px;
+    padding: 0.5rem;
+    color: #22c55e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-copy:hover {
+    background: rgba(34, 197, 94, 0.3);
+    transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .points-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .businesses-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .market-categories {
+        justify-content: center;
+    }
+    
+    .category-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .discounts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Navigation Points Display */
+.points-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.points-display i {
+    color: #f59e0b;
+}
+
+.points-display span:first-of-type {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.points-display span:last-of-type {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
