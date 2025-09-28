@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update discount value
         const discountValue = (userPoints * 0.10).toFixed(2);
-        document.querySelector('.points-card:nth-child(2) h3').textContent = `$${discountValue}`;
+        document.querySelector('.points-card:nth-child(2) h3').textContent = `R${discountValue}`;
     }
 
     // Add discount to UI

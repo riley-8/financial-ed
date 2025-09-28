@@ -17,12 +17,7 @@ function initializeLifeSimulator() {
         score: 0
     };
 
-    // DOM Elements
-    const balanceEl = document.getElementById('sim-balance');
-    const ageEl = document.getElementById('sim-age');
-    const healthEl = document.getElementById('sim-health');
-    const securityEl = document.getElementById('sim-security');
-    const knowledgeEl = document.getElementById('sim-knowledge');
+    // DOM Elements - REMOVED stats elements since they don't exist in HTML
     const scenarioTitleEl = document.getElementById('scenario-title');
     const scenarioDescEl = document.getElementById('scenario-description');
     const scenarioOptionsEl = document.getElementById('scenario-options');
@@ -31,7 +26,7 @@ function initializeLifeSimulator() {
     const saveBtn = document.getElementById('save-game');
     const hintBtn = document.getElementById('hint-btn');
 
-    // Scenario Database
+    // Scenario Database (unchanged)
     const scenarios = [
         {
             id: 1,
@@ -190,7 +185,7 @@ function initializeLifeSimulator() {
     // Initialize the game
     function initGame() {
         loadGameState();
-        updateStatsDisplay();
+        // REMOVED: updateStatsDisplay(); - since we don't have stats display
         generateNewScenario();
         updateHistoryDisplay();
         updateAchievementsDisplay();
@@ -211,14 +206,7 @@ function initializeLifeSimulator() {
         showNotification('Game progress saved successfully!', 'success');
     }
 
-    // Update stats display
-    function updateStatsDisplay() {
-        balanceEl.textContent = gameState.balance.toLocaleString();
-        ageEl.textContent = Math.floor(gameState.age);
-        healthEl.textContent = Math.floor(gameState.health);
-        securityEl.textContent = Math.floor(gameState.security);
-        knowledgeEl.textContent = Math.floor(gameState.knowledge);
-    }
+    // REMOVED: updateStatsDisplay() function entirely since we don't need it
 
     // Generate new scenario
     function generateNewScenario() {
@@ -298,8 +286,7 @@ function initializeLifeSimulator() {
         // Check for achievements
         checkAchievements();
         
-        // Update displays
-        updateStatsDisplay();
+        // Update displays - REMOVED: updateStatsDisplay();
         updateHistoryDisplay();
         
         // Show outcome modal
@@ -540,7 +527,7 @@ function initializeLifeSimulator() {
             gameState.achievements = ['security_expert'];
             gameState.score = 0;
             
-            updateStatsDisplay();
+            // REMOVED: updateStatsDisplay();
             generateNewScenario();
             updateHistoryDisplay();
             updateAchievementsDisplay();
@@ -572,7 +559,7 @@ function initializeLifeSimulator() {
     initGame();
 }
 
-// AI Widget functionality
+// AI Widget functionality (unchanged)
 function initializeAIWidget() {
     const aiWidget = document.getElementById('ai-widget');
     const aiFab = document.getElementById('ai-fab');
@@ -661,7 +648,7 @@ function initializeAIWidget() {
     }, 1000);
 }
 
-// Add notification styles
+// Add notification styles (unchanged)
 const notificationStyles = `
     .notification {
         position: fixed;

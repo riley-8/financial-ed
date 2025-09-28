@@ -492,7 +492,7 @@ function displaySummaryCards(summary) {
     const cards = [
         {
             title: 'Total Income',
-            value: `${summary.totalIncome.toFixed(2)}`,
+            value: `R${summary.totalIncome.toFixed(2)}`,
             change: '+5.2%',
             positive: true
         },

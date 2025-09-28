@@ -1,355 +1,699 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Center - FinSecure</title>
-    <link rel="stylesheet" href="../css/security-center.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Center - FinSecure</title>
+  <link rel="stylesheet" href="../css/security-center.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-shield-alt"></i>
-            <span>FinSecure</span>
-        </div>
-        
-        <div class="nav-center">
-            <div class="search-container">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search anything..." id="global-search">
-            </div>
-        </div>
-        
-        <div class="nav-right">
-            <div class="nav-item" id="notifications">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge">3</span>
-            </div>
-            <div class="nav-item" id="messages">
-                <i class="fas fa-envelope"></i>
-                <span class="notification-badge">2</span>
-            </div>
-            <div class="nav-item profile-dropdown">
-                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" class="profile-img">
-                <i class="fas fa-chevron-down"></i>
-                <div class="dropdown-menu">
-                    <a href="#"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <h1 class="nav-brand">
+      <i class="fas fa-shield-alt"></i>
+      <strong>FinSecure</strong>
+    </h1>
+    
+    <section class="nav-center">
+      <form class="search-container" role="search">
+        <label for="global-search" class="sr-only">Search</label>
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search anything..." id="global-search">
+      </form>
+    </section>
+    
+    <ul class="nav-right">
+      <li class="nav-item" id="notifications">
+        <i class="fas fa-bell"></i>
+        <mark class="notification-badge">3</mark>
+      </li>
+      <li class="nav-item" id="messages">
+        <i class="fas fa-envelope"></i>
+        <mark class="notification-badge">2</mark>
+      </li>
+      <li class="nav-item profile-dropdown">
+        <figure>
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" 
+               alt="Profile" class="profile-img">
+        </figure>
+        <i class="fas fa-chevron-down"></i>
+        <menu class="dropdown-menu">
+          <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+          <a href="#"><i class="fas fa-cog"></i> Settings</a>
+          <a href="landing.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </menu>
+      </li>
+    </ul>
+  </nav>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <button class="sidebar-toggle" id="sidebar-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-        
-        <nav class="sidebar-nav">
-            <a href="dashboard.html" class="nav-link">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="ai-advisor.html" class="nav-link">
-                <i class="fas fa-robot"></i>
-                <span>Personal Advisor</span>
-            </a>
-            <a href="statement-analyzer.html" class="nav-link">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <span>Statement Analyzer</span>
-            </a>
-            <a href="fraud-scanner.html" class="nav-link">
-                <i class="fas fa-shield-virus"></i>
-                <span>Fraud Scanner</span>
-            </a>
-            <a href="security-center.html" class="nav-link active">
-                <i class="fas fa-lock"></i>
-                <span>Security Center</span>
-            </a>
-            <a href="education.html" class="nav-link">
-                <i class="fas fa-graduation-cap"></i>
-                <span>Education Hub</span>
-            </a>
-            <a href="life-simulator.html" class="nav-link">
-                <i class="fas fa-gamepad"></i>
-                <span>Life Simulator</span>
-            </a>
-            <a href="challenges.html" class="nav-link">
-                <i class="fas fa-trophy"></i>
-                <span>Challenges</span>
-            </a>
-            
-            <a href="market.html" class="nav-link">
-                <i class="fas fa-store"></i>
-                <span>Local Market</span>
-            </a>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Security Center Section -->
-        <section id="security-center" class="content-section active">
-            <div class="section-header">
-                <h1>Security Center</h1>
-                <p>Monitor and manage your security settings</p>
-            </div>
-
-            <div class="security-dashboard">
-                <!-- Security Score Card -->
-                <div class="security-score-card">
-                    <div class="score-circle">
-                        <div class="score-value">98</div>
-                        <div class="score-label">Security Score</div>
-                    </div>
-                    <div class="score-breakdown">
-                        <div class="score-item">
-                            <span>Password Security</span>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 95%"></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Account Protection</span>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Data Encryption</span>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Network Security</span>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 85%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Security Alerts -->
-                <div class="security-alerts">
-                    <div class="alerts-header">
-                        <h3>Security Alerts</h3>
-                        <button class="view-all-alerts">View All</button>
-                    </div>
-                    <div class="alert-item high">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div class="alert-content">
-                            <h4>Suspicious Login Attempt</h4>
-                            <p>Login attempted from unusual location (New York, USA)</p>
-                            <span>2 minutes ago</span>
-                        </div>
-                        <button class="alert-action">Review</button>
-                    </div>
-                    <div class="alert-item medium">
-                        <i class="fas fa-info-circle"></i>
-                        <div class="alert-content">
-                            <h4>Password Expiry</h4>
-                            <p>Your password expires in 7 days</p>
-                            <span>1 hour ago</span>
-                        </div>
-                        <button class="alert-action">Update</button>
-                    </div>
-                    <div class="alert-item low">
-                        <i class="fas fa-shield-check"></i>
-                        <div class="alert-content">
-                            <h4>Security Scan Completed</h4>
-                            <p>No threats detected in latest scan</p>
-                            <span>4 hours ago</span>
-                        </div>
-                        <button class="alert-action">Details</button>
-                    </div>
-                </div>
-
-                <!-- Security Settings -->
-                <div class="security-settings">
-                    <h3>Security Settings</h3>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Two-Factor Authentication</h4>
-                            <p>Add an extra layer of security to your account</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked id="2fa-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Login Notifications</h4>
-                            <p>Get notified of account access from new devices</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked id="login-notifications-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Automatic Fraud Monitoring</h4>
-                            <p>Monitor transactions for suspicious activity</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked id="fraud-monitoring-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Biometric Authentication</h4>
-                            <p>Use fingerprint or face recognition for login</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="biometric-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Automatic Logout</h4>
-                            <p>Automatically log out after 15 minutes of inactivity</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked id="auto-logout-toggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Device Management -->
-                <div class="device-management">
-                    <h3>Connected Devices</h3>
-                    <div class="device-list">
-                        <div class="device-item">
-                            <div class="device-info">
-                                <i class="fas fa-laptop"></i>
-                                <div>
-                                    <h4>MacBook Pro</h4>
-                                    <p>Last active: 2 hours ago</p>
-                                    <span>San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="device-status active">Current</div>
-                        </div>
-                        <div class="device-item">
-                            <div class="device-info">
-                                <i class="fas fa-mobile-alt"></i>
-                                <div>
-                                    <h4>iPhone 14</h4>
-                                    <p>Last active: 1 day ago</p>
-                                    <span>San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="device-status">Trusted</div>
-                        </div>
-                        <div class="device-item">
-                            <div class="device-info">
-                                <i class="fas fa-tablet-alt"></i>
-                                <div>
-                                    <h4>iPad Air</h4>
-                                    <p>Last active: 3 days ago</p>
-                                    <span>New York, NY</span>
-                                </div>
-                            </div>
-                            <div class="device-status suspicious">Suspicious</div>
-                        </div>
-                    </div>
-                    <button class="btn manage-devices-btn">Manage All Devices</button>
-                </div>
-
-                <!-- Security History -->
-                <div class="security-history">
-                    <h3>Security History</h3>
-                    <div class="history-timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-marker success"></div>
-                            <div class="timeline-content">
-                                <h4>Password Updated</h4>
-                                <p>Your password was successfully changed</p>
-                                <span>Today, 10:30 AM</span>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker warning"></div>
-                            <div class="timeline-content">
-                                <h4>New Login Detected</h4>
-                                <p>Login from new device (iPhone 14)</p>
-                                <span>Yesterday, 3:45 PM</span>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker success"></div>
-                            <div class="timeline-content">
-                                <h4>Security Scan</h4>
-                                <p>No threats detected in system scan</p>
-                                <span>2 days ago</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="security-quick-actions">
-                    <h3>Quick Actions</h3>
-                    <div class="action-grid">
-                        <button class="action-btn" id="change-password-btn">
-                            <i class="fas fa-key"></i>
-                            <span>Change Password</span>
-                        </button>
-                        <button class="action-btn" id="backup-codes-btn">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Backup Codes</span>
-                        </button>
-                        <button class="action-btn" id="emergency-contacts-btn">
-                            <i class="fas fa-user-shield"></i>
-                            <span>Emergency Contacts</span>
-                        </button>
-                        <button class="action-btn" id="privacy-settings-btn">
-                            <i class="fas fa-eye-slash"></i>
-                            <span>Privacy Settings</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- AI Widget (Floating) -->
-    <div class="ai-widget-floating" id="ai-widget">
-        <div class="ai-widget-header">
-            <i class="fas fa-robot"></i>
-            <span>Security Assistant</span>
-            <button class="widget-close" id="close-ai-widget">×</button>
-        </div>
-        <div class="ai-widget-content">
-            <div class="ai-messages" id="ai-messages">
-                <div class="ai-message">
-                    <p>Hi! I'm your security assistant. How can I help you with your security settings today?</p>
-                </div>
-            </div>
-            <div class="ai-input-container">
-                <input type="text" id="ai-input" placeholder="Ask about security...">
-                <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Action Button for AI Widget -->
-    <button class="ai-fab" id="ai-fab">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <header class="sidebar-header">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+    </header>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-link">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="ai-advisor.html" class="nav-link">
         <i class="fas fa-robot"></i>
-    </button>
+        <span>Personal Advisor</span>
+      </a>
+      <a href="statement-analyzer.html" class="nav-link">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <span>Statement Analyzer</span>
+      </a>
+      <a href="fraud-scanner.html" class="nav-link">
+        <i class="fas fa-shield-virus"></i>
+        <span>Fraud Scanner</span>
+      </a>
+      <a href="security-center.html" class="nav-link active">
+        <i class="fas fa-lock"></i>
+        <span>Security Center</span>
+      </a>
+      <a href="education.html" class="nav-link">
+        <i class="fas fa-graduation-cap"></i>
+        <span>Education Hub</span>
+      </a>
+      <a href="life-simulator.html" class="nav-link">
+        <i class="fas fa-gamepad"></i>
+        <span>Life Simulator</span>
+      </a>
+      <a href="challenges.html" class="nav-link">
+        <i class="fas fa-trophy"></i>
+        <span>Challenges</span>
+      </a>
 
-    <script src="../js/security-center.js"></script>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <section class="content-section active" id="security-center">
+      <header class="section-header">
+        <h1>Security Center</h1>
+        <p>Protect yourself from financial fraud with our comprehensive security resources</p>
+      </header>
+
+      <section class="security-grid">
+        <!-- Report Fraud Section -->
+        <article class="security-card">
+          <header class="card-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Report Fraud</h2>
+          </header>
+          <p>If you suspect fraudulent activity, report it immediately using our national hotlines.</p>
+          <button class="card-btn" id="report-fraud-btn">
+            <i class="fas fa-phone-alt"></i>
+            Report Fraud
+          </button>
+        </article>
+
+        <!-- Latest Scam Section -->
+        <article class="security-card">
+          <header class="card-header">
+            <i class="fas fa-bullhorn"></i>
+            <h2>Latest Scam</h2>
+          </header>
+          <p>Stay informed about the newest scams targeting consumers and businesses.</p>
+          <button class="card-btn" id="latest-scam-btn">
+            <i class="fas fa-arrow-right"></i>
+            View Latest Scam
+          </button>
+        </article>
+
+        <!-- Protect Yourself Section -->
+        <article class="security-card">
+          <header class="card-header">
+            <i class="fas fa-user-shield"></i>
+            <h2>Protect Yourself</h2>
+          </header>
+          <p>Learn essential security practices to safeguard your financial information.</p>
+          <button class="card-btn" id="protect-yourself-btn">
+            <i class="fas fa-arrow-right"></i>
+            Learn More
+          </button>
+        </article>
+
+        <!-- Digital Fraud Section -->
+        <article class="security-card">
+          <header class="card-header">
+            <i class="fas fa-desktop"></i>
+            <h2>Digital Fraud</h2>
+          </header>
+          <p>Understand various types of digital fraud and how to protect against them.</p>
+          <button class="card-btn" id="digital-fraud-btn">
+            <i class="fas fa-arrow-right"></i>
+            Explore Digital Fraud
+          </button>
+        </article>
+
+        <!-- Other Types of Fraud Section -->
+        <article class="security-card">
+          <header class="card-header">
+            <i class="fas fa-credit-card"></i>
+            <h2>Other Types of Fraud</h2>
+          </header>
+          <p>Learn about card fraud, ATM fraud, and other financial security threats.</p>
+          <button class="card-btn" id="other-fraud-btn">
+            <i class="fas fa-arrow-right"></i>
+            View Other Frauds
+          </button>
+        </article>
+
+        <!-- Security Status Widget -->
+        <article class="security-card status-card">
+          <header class="card-header">
+            <i class="fas fa-shield-alt"></i>
+            <h2>Your Security Status</h2>
+          </header>
+          <section class="status-indicator">
+            <figure class="status-circle">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path class="circle"
+                  stroke-dasharray="85, 100"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              <figcaption class="status-value">85%</figcaption>
+            </figure>
+            <p class="status-text">Good - Your security practices are above average</p>
+          </section>
+          <button class="card-btn secondary">
+            <i class="fas fa-chart-line"></i>
+            Improve Security
+          </button>
+        </article>
+      </section>
+    </section>
+
+    <!-- Latest Scam Page -->
+    <section class="content-section" id="latest-scam-page">
+      <header class="page-header">
+        <button class="back-btn" id="back-from-scam">
+          <i class="fas fa-arrow-left"></i>
+          Back to Security Center
+        </button>
+        <h1>Latest Scam Alert</h1>
+      </header>
+
+      <article class="scam-alert">
+        <header class="alert-header">
+          <i class="fas fa-exclamation-circle"></i>
+          <h2>Phishing Email Scam Targeting Bank Customers</h2>
+          <time datetime="2023-10-15">Alert Date: October 15, 2023</time>
+        </header>
+        
+        <section class="alert-content">
+          <p>Scammers are sending fraudulent emails pretending to be from major banks, asking customers to verify their account details due to "suspicious activity." These emails contain links to fake banking websites designed to steal login credentials.</p>
+          
+          <section class="scam-details">
+            <h3>Key Indicators:</h3>
+            <ul>
+              <li>Urgent language demanding immediate action</li>
+              <li>Generic greetings like "Dear Customer" instead of your name</li>
+              <li>Suspicious sender email addresses</li>
+              <li>Links that don't match the bank's official website</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="how-it-works-btn">
+            <i class="fas fa-info-circle"></i>
+            How It Works
+          </button>
+        </section>
+      </article>
+    </section>
+
+    <!-- Protect Yourself Page -->
+    <section class="content-section" id="protect-yourself-page">
+      <header class="page-header">
+        <button class="back-btn" id="back-from-protect">
+          <i class="fas fa-arrow-left"></i>
+          Back to Security Center
+        </button>
+        <h1>Protect Yourself</h1>
+      </header>
+
+      <nav class="protection-nav">
+        <button class="protection-tab active" data-tab="dos-donts">
+          <i class="fas fa-check-circle"></i>
+          Do's and Don'ts
+        </button>
+        <button class="protection-tab" data-tab="security-software">
+          <i class="fas fa-shield-alt"></i>
+          Security Software
+        </button>
+        <button class="protection-tab" data-tab="what-to-expect">
+          <i class="fas fa-building"></i>
+          What to Expect
+        </button>
+      </nav>
+
+      <section class="protection-content">
+        <article class="protection-section active" id="dos-donts">
+          <h2>Banking Security: Do's and Don'ts</h2>
+          <section class="dos-section">
+            <h3><i class="fas fa-check"></i> Do:</h3>
+            <ul>
+              <li>Use strong, unique passwords for each financial account</li>
+              <li>Enable two-factor authentication whenever possible</li>
+              <li>Regularly monitor your account statements</li>
+              <li>Keep your contact information updated with your bank</li>
+              <li>Use secure networks for financial transactions</li>
+            </ul>
+          </section>
+          
+          <section class="donts-section">
+            <h3><i class="fas fa-times"></i> Don't:</h3>
+            <ul>
+              <li>Share passwords or PINs with anyone</li>
+              <li>Click on links in unsolicited emails or texts</li>
+              <li>Use public Wi-Fi for banking without a VPN</li>
+              <li>Save banking passwords in your browser</li>
+              <li>Respond to calls asking for personal information</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="protection-section" id="security-software">
+          <h2>Security Software & Device Protection</h2>
+          <p>Keeping your devices secure is crucial for protecting your financial information.</p>
+          
+          <section class="software-tips">
+            <h3>Essential Security Measures:</h3>
+            <ul>
+              <li>Install reputable antivirus and anti-malware software</li>
+              <li>Keep your operating system and apps updated</li>
+              <li>Use a firewall to block unauthorized access</li>
+              <li>Enable device encryption for added protection</li>
+              <li>Regularly back up important data</li>
+            </ul>
+          </section>
+          
+          <section class="update-schedule">
+            <h3>Recommended Update Schedule:</h3>
+            <ul>
+              <li>Operating System: Update immediately when available</li>
+              <li>Antivirus Software: Daily automatic updates</li>
+              <li>Browser: Weekly checks for updates</li>
+              <li>Banking Apps: Update as soon as new versions are released</li>
+            </ul>
+          </section>
+        </article>
+
+        <article class="protection-section" id="what-to-expect">
+          <h2>What Banks Do to Protect You</h2>
+          <p>Financial institutions employ multiple layers of security to safeguard your accounts.</p>
+          
+          <section class="bank-security">
+            <h3>Security Measures Implemented by Banks:</h3>
+            <ul>
+              <li>One-Time Passwords (OTPs) for transaction verification</li>
+              <li>Encryption of all sensitive data in transit and at rest</li>
+              <li>Fraud detection systems monitoring for suspicious activity</li>
+              <li>Secure socket layer (SSL) certificates for website security</li>
+              <li>Multi-factor authentication for account access</li>
+            </ul>
+          </section>
+          
+          <section class="customer-responsibilities">
+            <h3>Your Role in Security:</h3>
+            <p>While banks provide robust security measures, customers must also practice safe banking habits to ensure comprehensive protection.</p>
+          </section>
+        </article>
+      </section>
+    </section>
+
+    <!-- Digital Fraud Page -->
+    <section class="content-section" id="digital-fraud-page">
+      <header class="page-header">
+        <button class="back-btn" id="back-from-digital">
+          <i class="fas fa-arrow-left"></i>
+          Back to Security Center
+        </button>
+        <h1>Digital Fraud</h1>
+      </header>
+
+      <nav class="digital-nav">
+        <button class="digital-tab active" data-tab="identity-theft">
+          <i class="fas fa-id-card"></i>
+          Identity Theft
+        </button>
+        <button class="digital-tab" data-tab="phishing">
+          <i class="fas fa-fish"></i>
+          Phishing
+        </button>
+        <button class="digital-tab" data-tab="vishing">
+          <i class="fas fa-phone"></i>
+          Vishing
+        </button>
+        <button class="digital-tab" data-tab="smishing">
+          <i class="fas fa-sms"></i>
+          Smishing
+        </button>
+        <button class="digital-tab" data-tab="sim-swap">
+          <i class="fas fa-sim-card"></i>
+          SIM Swap & Porting
+        </button>
+      </nav>
+
+      <section class="digital-content">
+        <article class="digital-section active" id="identity-theft">
+          <h2>Identity Theft</h2>
+          <p>Identity theft occurs when someone uses your personal information without your permission to commit fraud or other crimes.</p>
+          
+          <section class="fraud-examples">
+            <h3>Common Examples:</h3>
+            <ul>
+              <li>Opening credit cards or loans in your name</li>
+              <li>Filing tax returns using your Social Security number</li>
+              <li>Using your health insurance to obtain medical care</li>
+              <li>Creating fake IDs using your personal information</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="identity-safety-tips">
+            <i class="fas fa-shield-alt"></i>
+            Safety Tips
+          </button>
+        </article>
+
+        <article class="digital-section" id="phishing">
+          <h2>Phishing</h2>
+          <p>Phishing is a cybercrime where targets are contacted by email, telephone, or text message by someone posing as a legitimate institution to lure individuals into providing sensitive data.</p>
+          
+          <section class="fraud-examples">
+            <h3>Common Examples:</h3>
+            <ul>
+              <li>Fake banking emails requesting password verification</li>
+              <li>Social media messages with malicious links</li>
+              <li>Fake invoice attachments containing malware</li>
+              <li>Impersonation of tech support to gain remote access</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="phishing-safety-tips">
+            <i class="fas fa-shield-alt"></i>
+            Safety Tips
+          </button>
+        </article>
+
+        <article class="digital-section" id="vishing">
+          <h2>Vishing</h2>
+          <p>Vishing (voice phishing) involves fraudulent phone calls or voice messages pretending to be from reputable companies to induce individuals to reveal personal information.</p>
+          
+          <section class="fraud-examples">
+            <h3>Common Examples:</h3>
+            <ul>
+              <li>Automated calls claiming your Social Security number is compromised</li>
+              <li>Callers pretending to be from your bank's fraud department</li>
+              <li>Tech support scams requesting remote access to your computer</li>
+              <li>Warrant scams threatening arrest unless payment is made</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="vishing-safety-tips">
+            <i class="fas fa-shield-alt"></i>
+            Safety Tips
+          </button>
+        </article>
+
+        <article class="digital-section" id="smishing">
+          <h2>Smishing</h2>
+          <p>Smishing (SMS phishing) uses text messages to trick victims into providing personal information or downloading malicious software onto their mobile devices.</p>
+          
+          <section class="fraud-examples">
+            <h3>Common Examples:</h3>
+            <ul>
+              <li>Texts claiming you've won a prize and need to click a link</li>
+              <li>Messages about suspicious account activity with a link to "verify"</li>
+              <li>Fake delivery notifications requiring payment or information</li>
+              <li>COVID-19 related scams offering tests or financial relief</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="smishing-safety-tips">
+            <i class="fas fa-shield-alt"></i>
+            Safety Tips
+          </button>
+        </article>
+
+        <article class="digital-section" id="sim-swap">
+          <h2>SIM Swap & Porting Fraud</h2>
+          <p>SIM swapping occurs when a fraudster convinces your mobile carrier to transfer your phone number to a SIM card in their possession, allowing them to intercept two-factor authentication codes.</p>
+          
+          <section class="fraud-examples">
+            <h3>How It Works:</h3>
+            <ul>
+              <li>Scammers gather personal information through data breaches or phishing</li>
+              <li>They contact your mobile provider pretending to be you</li>
+              <li>They claim your SIM card is lost or damaged and request a replacement</li>
+              <li>Once they control your number, they can bypass SMS-based 2FA</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="simswap-safety-tips">
+            <i class="fas fa-shield-alt"></i>
+            Safety Tips
+          </button>
+        </article>
+      </section>
+    </section>
+
+    <!-- Other Types of Fraud Page -->
+    <section class="content-section" id="other-fraud-page">
+      <header class="page-header">
+        <button class="back-btn" id="back-from-other">
+          <i class="fas fa-arrow-left"></i>
+          Back to Security Center
+        </button>
+        <h1>Other Types of Fraud</h1>
+      </header>
+
+      <nav class="other-nav">
+        <button class="other-tab active" data-tab="card-fraud">
+          <i class="fas fa-credit-card"></i>
+          Card Fraud
+        </button>
+        <button class="other-tab" data-tab="atm-fraud">
+          <i class="fas fa-money-bill-wave"></i>
+          ATM Fraud
+        </button>
+      </nav>
+
+      <section class="other-content">
+        <article class="other-section active" id="card-fraud">
+          <h2>Card Fraud</h2>
+          <p>Card fraud involves unauthorized use of your debit or credit card information to make purchases or withdraw funds.</p>
+          
+          <section class="fraud-types">
+            <h3>Types of Card Fraud:</h3>
+            <button class="fraud-type-btn" data-type="counterfeit">
+              <i class="fas fa-copy"></i>
+              Counterfeit Cards
+            </button>Total Income
+            <button class="fraud-type-btn" data-type="lost-stolen">
+              <i class="fas fa-exclamation-triangle"></i>
+              Lost or Stolen Cards
+            </button>
+            <button class="fraud-type-btn" data-type="card-not-present">
+              <i class="fas fa-laptop"></i>
+              Card-Not-Present Fraud
+            </button>
+            <button class="fraud-type-btn" data-type="skimming">
+              <i class="fas fa-receipt"></i>
+              Skimming
+            </button>
+          </section>
+        </article>
+
+        <article class="other-section" id="atm-fraud">
+          <h2>ATM Fraud</h2>
+          <p>ATM fraud involves various techniques criminals use to steal your card information or cash at automated teller machines.</p>
+          
+          <section class="fraud-examples">
+            <h3>Common ATM Fraud Techniques:</h3>
+            <ul>
+              <li>Skimming devices attached to card readers</li>
+              <li>Hidden cameras recording PIN entries</li>
+              <li>Trapping devices that prevent card retrieval</li>
+              <li>Distraction techniques while transactions are in process</li>
+            </ul>
+          </section>
+          
+          <button class="card-btn" id="atm-dos-donts">
+            <i class="fas fa-list-alt"></i>
+            Do's and Don'ts
+          </button>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <!-- Modals -->
+  <dialog class="modal" id="report-fraud-modal">
+    <article class="modal-content">
+      <header class="modal-header">
+        <h2>Report Fraud - National Hotlines</h2>
+        <button class="modal-close" id="close-report-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </header>
+      <section class="modal-body">
+        <p>If you suspect fraudulent activity, contact these national hotlines immediately:</p>
+        
+        <section class="hotline-list">
+          <article class="hotline-item">
+            <h3>National Fraud Hotline</h3>
+            <p><i class="fas fa-phone"></i> 1-800-123-4567</p>
+            <p>Available 24/7 for reporting financial fraud</p>
+          </article>
+          
+          <article class="hotline-item">
+            <h3>Identity Theft Hotline</h3>
+            <p><i class="fas fa-phone"></i> 1-888-987-6543</p>
+            <p>Specialized assistance for identity theft cases</p>
+          </article>
+          
+          <article class="hotline-item">
+            <h3>Cyber Crime Unit</h3>
+            <p><i class="fas fa-phone"></i> 1-877-555-7890</p>
+            <p>Report online scams and digital fraud</p>
+          </article>
+        </section>
+        
+        <section class="emergency-tips">
+          <h3>What to Do Immediately:</h3>
+          <ul>
+            <li>Contact your bank to freeze affected accounts</li>
+            <li>Change all online passwords</li>
+            <li>Monitor your credit reports</li>
+            <li>File a police report if significant funds are involved</li>
+          </ul>
+        </section>
+      </section>
+    </article>
+  </dialog>
+
+  <dialog class="modal" id="scam-details-modal">
+    <article class="modal-content">
+      <header class="modal-header">
+        <h2>How the Scam Works</h2>
+        <button class="modal-close" id="close-scam-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </header>
+      <section class="modal-body">
+        <section class="scam-steps">
+          <h3>Step-by-Step Breakdown:</h3>
+          <ol>
+            <li>Scammers send emails that appear to be from legitimate banks</li>
+            <li>Emails create urgency by claiming suspicious account activity</li>
+            <li>Recipients are directed to click a link to "verify" their account</li>
+            <li>The link goes to a fake website that mimics the real bank's login page</li>
+            <li>Victims enter their credentials, which are captured by scammers</li>
+            <li>Scammers use these credentials to access real bank accounts</li>
+          </ol>
+        </section>
+        
+        <section class="protect-yourself">
+          <h3>Protect Yourself:</h3>
+          <ul>
+            <li>Never click links in unsolicited emails</li>
+            <li>Always navigate to your bank's website directly</li>
+            <li>Check for HTTPS and security certificates</li>
+            <li>Enable two-factor authentication on all accounts</li>
+            <li>Regularly monitor your account statements</li>
+          </ul>
+        </section>
+        
+        <section class="report-reminder">
+          <h3>Report This Scam:</h3>
+          <p>If you encounter this scam, report it immediately using the numbers in our <strong>Report Fraud</strong> section.</p>
+          <button class="card-btn" id="report-from-modal">
+            <i class="fas fa-phone-alt"></i>
+            Report Now
+          </button>
+        </section>
+      </section>
+    </article>
+  </dialog>
+
+  <!-- Safety Tips Modals -->
+  <dialog class="modal safety-tips-modal" id="identity-theft-tips">
+    <article class="modal-content">
+      <header class="modal-header">
+        <h2>Identity Theft Safety Tips</h2>
+        <button class="modal-close close-safety-tips">
+          <i class="fas fa-times"></i>
+        </button>
+      </header>
+      <section class="modal-body">
+        <section class="safety-tips">
+          <h3>Prevention:</h3>
+          <ul>
+            <li>Shred documents containing personal information before disposal</li>
+            <li>Use strong, unique passwords for all online accounts</li>
+            <li>Monitor your credit reports regularly</li>
+            <li>Be cautious about sharing personal information online</li>
+            <li>Freeze your credit if you suspect your information is compromised</li>
+          </ul>
+          
+          <h3>If You're a Victim:</h3>
+          <ul>
+            <li>Contact the fraud departments of the three major credit bureaus</li>
+            <li>Place a fraud alert on your credit reports</li>
+            <li>File a report with the Federal Trade Commission</li>
+            <li>Contact your financial institutions to secure accounts</li>
+            <li>File a police report</li>
+          </ul>
+        </section>
+      </section>
+    </article>
+  </dialog>
+
+  <!-- Additional modals would follow the same pattern for other safety tips -->
+
+  <!-- AI Widget (Floating) -->
+  <section class="ai-widget-floating" id="ai-widget" aria-live="polite">
+    <header class="ai-widget-header">
+      <i class="fas fa-robot"></i>
+      <h2>Security Assistant</h2>
+      <button class="widget-close" id="close-ai-widget" aria-label="Close AI widget">×</button>
+    </header>
+    <section class="ai-widget-content">
+      <section class="ai-messages" id="ai-messages">
+        <article class="ai-message">
+          <p>Hi! I'm your security assistant. How can I help you with your security settings today?</p>
+        </article>
+      </section>
+      <form class="ai-input-container">
+        <label for="ai-input" class="sr-only">Ask Security Assistant</label>
+        <input type="text" id="ai-input" placeholder="Ask about security...">
+        <button id="send-ai-message" type="submit"><i class="fas fa-paper-plane"></i></button>
+      </form>
+    </section>
+  </section>
+
+  <!-- Floating Action Button for AI Widget -->
+  <button class="ai-fab" id="ai-fab" aria-label="Open AI widget">
+    <i class="fas fa-robot"></i>
+  </button>
+
+  <script src="../js/security-center.js"></script>
 </body>
 </html>
