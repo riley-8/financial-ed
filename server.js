@@ -118,6 +118,241 @@ function parseGeminiResponse(text, type = "url") {
   }
 }
 
+// Market and Points System Endpoints
+
+// User points data storage (in production, use Supabase)
+let userPoints = {
+    'user123': {
+        points: 1250,
+        redeemedDiscounts: [],
+        activeDiscounts: []
+    }
+};
+
+// Local businesses data
+const localBusinesses = [
+    {
+        id: 'coffee-corner',
+        name: 'Coffee Corner',
+        category: 'food',
+        discount: '15% OFF',
+        pointsCost: 500,
+        description: 'Valid on all drinks and pastries. Expires in 30 days.',
+        location: '123 Main St',
+        distance: '0.5mi',
+        rating: 4.7,
+        image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300&h=200&fit=crop'
+    },
+    {
+        id: 'book-nook',
+        name: 'Book Nook',
+        category: 'retail',
+        discount: '20% OFF',
+        pointsCost: 800,
+        description: 'Valid on all books and merchandise. Expires in 45 days.',
+        location: '456 Oak Ave',
+        distance: '0.8mi',
+        rating: 4.9,
+        image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop'
+    },
+    {
+        id: 'fit-life',
+        name: 'Fit Life Gym',
+        category: 'services',
+        discount: '1 Month FREE',
+        pointsCost: 1500,
+        description: 'Valid for new members. Includes all amenities.',
+        location: '789 Fitness Rd',
+        distance: '1.2mi',
+        rating: 4.5,
+        image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&h=200&fit=crop'
+    },
+    {
+        id: 'pasta-paradise',
+        name: 'Pasta Paradise',
+        category: 'food',
+        discount: '25% OFF',
+        pointsCost: 1000,
+        description: 'Valid for parties up to 4. Excludes alcohol.',
+        location: '321 Italian Way',
+        distance: '0.3mi',
+        rating: 4.8,
+        image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=300&h=200&fit=crop'
+    },
+    {
+        id: 'cineplex',
+        name: 'Cineplex Theater',
+        category: 'entertainment',
+        discount: '2 Tickets + Popcorn',
+        pointsCost: 1200,
+        description: 'Valid any day except holidays. Includes regular popcorn.',
+        location: '555 Cinema Blvd',
+        distance: '2.1mi',
+        rating: 4.3,
+        image: 'https://images.unsplash.com/photo-1489599809519-364a47ae3cde?w=300&h=200&fit=crop'
+    },
+    {
+        id: 'style-studio',
+        name: 'Style Studio',
+        category: 'services',
+        discount: '30% OFF',
+        pointsCost: 600,
+        description: 'Valid on haircuts and styling. Expires in 60 days.',
+        location: '234 Beauty Ave',
+        distance: '0.7mi',
+        rating: 4.9,
+        image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop'
+    }
+];
+
+// GET user points
+app.get('/api/market/points', (req, res) => {
+    const userId = req.query.userId || 'user123'; // In production, use authentication
+    const user = userPoints[userId] || { points: 0, redeemedDiscounts: [], activeDiscounts: [] };
+    
+    res.json({
+        points: user.points,
+        redeemedCount: user.redeemedDiscounts.length,
+        activeCount: user.activeDiscounts.length,
+        discountValue: (user.points * 0.10).toFixed(2)
+    });
+});
+
+// GET local businesses
+app.get('/api/market/businesses', (req, res) => {
+    const category = req.query.category;
+    let businesses = localBusinesses;
+    
+    if (category && category !== 'all') {
+        businesses = localBusinesses.filter(business => business.category === category);
+    }
+    
+    res.json(businesses);
+});
+
+// POST redeem discount
+app.post('/api/market/redeem', (req, res) => {
+    const { userId, businessId, pointsCost } = req.body;
+    const user = userPoints[userId || 'user123'];
+    
+    if (!user) {
+        userPoints[userId || 'user123'] = {
+            points: 0,
+            redeemedDiscounts: [],
+            activeDiscounts: []
+        };
+    }
+    
+    const currentUser = userPoints[userId || 'user123'];
+    
+    if (currentUser.points < pointsCost) {
+        return res.status(400).json({ error: 'Insufficient points' });
+    }
+    
+    const business = localBusinesses.find(b => b.id === businessId);
+    if (!business) {
+        return res.status(404).json({ error: 'Business not found' });
+    }
+    
+    // Generate unique discount code
+    const discountCode = `FIN${Math.floor(1000 + Math.random() * 9000)}${businessId.slice(0, 3).toUpperCase()}`;
+    
+    // Calculate expiry date (30 days from now)
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 30);
+    
+    const discount = {
+        id: Date.now().toString(),
+        businessId,
+        businessName: business.name,
+        discount: business.discount,
+        code: discountCode,
+        pointsCost,
+        redeemedAt: new Date().toISOString(),
+        expiresAt: expiryDate.toISOString(),
+        status: 'active'
+    };
+    
+    // Update user points and discounts
+    currentUser.points -= pointsCost;
+    currentUser.activeDiscounts.push(discount);
+    currentUser.redeemedDiscounts.push(discount);
+    
+    res.json({
+        success: true,
+        newPoints: currentUser.points,
+        discount: discount
+    });
+});
+
+// GET user active discounts
+app.get('/api/market/discounts', (req, res) => {
+    const userId = req.query.userId || 'user123';
+    const user = userPoints[userId];
+    
+    if (!user) {
+        return res.json({ discounts: [] });
+    }
+    
+    // Filter out expired discounts
+    const now = new Date();
+    user.activeDiscounts = user.activeDiscounts.filter(discount => 
+        new Date(discount.expiresAt) > now
+    );
+    
+    res.json({ discounts: user.activeDiscounts });
+});
+
+// POST add points from challenges
+app.post('/api/market/add-points', (req, res) => {
+    const { userId, points, challengeId } = req.body;
+    const user = userPoints[userId || 'user123'];
+    
+    if (!user) {
+        userPoints[userId || 'user123'] = {
+            points: points,
+            redeemedDiscounts: [],
+            activeDiscounts: []
+        };
+    } else {
+        user.points += points;
+    }
+    
+    // Log the points addition for analytics
+    console.log(`Added ${points} points to user ${userId} for challenge ${challengeId}`);
+    
+    res.json({ 
+        success: true, 
+        newPoints: userPoints[userId || 'user123'].points 
+    });
+});
+
+// GET market analytics for businesses
+app.get('/api/market/analytics', (req, res) => {
+    // This would provide data to businesses about redemption rates, etc.
+    const analytics = {
+        totalRedemptions: Object.values(userPoints).reduce((total, user) => 
+            total + user.redeemedDiscounts.length, 0
+        ),
+        totalPointsInCirculation: Object.values(userPoints).reduce((total, user) => 
+            total + user.points, 0
+        ),
+        popularBusinesses: localBusinesses.map(business => ({
+            ...business,
+            redemptions: Object.values(userPoints).reduce((total, user) => 
+                total + user.redeemedDiscounts.filter(d => d.businessId === business.id).length, 0
+            )
+        })).sort((a, b) => b.redemptions - a.redemptions)
+    };
+    
+    res.json(analytics);
+});
+
+// Serve market.html
+app.get("/market", (req, res) => {
+    res.sendFile(path.join(__dirname, "src", "frontend", "html", "market.html"));
+});
+
 // AI Chat endpoint for Gemini integration
 app.post("/api/chat", async (req, res) => {
   try {
