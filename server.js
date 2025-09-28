@@ -14,10 +14,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve static assets (CSS, JS, images) from src/frontend
+// Serve static assets
 app.use(express.static(path.join(__dirname, "src", "frontend")));
-
-// ✅ Serve all HTML files directly from src/frontend/html
 app.use(express.static(path.join(__dirname, "src", "frontend", "html")));
 
 // Connect to Supabase
@@ -36,7 +34,471 @@ app.get("/api", (req, res) => {
   res.json({ message: "API is running 🚀" });
 });
 
-// Helper function to parse Gemini responses
+// Enhanced AI Chat endpoint with education context
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { message, context } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-pro",
+    });
+
+    let systemPrompt = `You are a professional Personal Financial Advisor and Educational Content Creator for FinSecure app.`;
+
+    // Customize prompt based on context
+    switch(context) {
+      case 'course_generation':
+        systemPrompt += `
+
+Create comprehensive financial literacy course content. When asked about a course topic:
+
+1. Create an engaging, actionable course title (max 50 characters)
+2. Write a compelling description (max 120 characters) that explains practical benefits
+3. List 3-4 specific learning outcomes that students will achieve
+
+Focus on:
+- Beginner-friendly content that builds confidence
+- Practical, actionable strategies people can implement immediately
+- Real-world applications and examples
+- Current financial trends and best practices for 2024
+
+Format your response clearly with:
+Title: [course title]
+Description: [practical description]
+Learning Outcomes:
+• [outcome 1]
+• [outcome 2] 
+• [outcome 3]
+
+Topic: ${message}`;
+        break;
+
+      case 'article_generation':
+        systemPrompt += `
+
+Create engaging financial article content. When asked about an article topic:
+
+1. Create a compelling, clickable title (max 60 characters)
+2. Write an engaging preview/summary (max 150 characters) that makes readers want to learn more
+3. List key insights the article would cover
+
+Focus on:
+- Current financial trends and market developments
+- Practical advice people can use today  
+- Common mistakes to avoid
+- Expert insights and data-driven recommendations
+- Relevance to 2024 economic conditions
+
+Format your response clearly with:
+Title: [engaging title]
+Preview: [compelling summary]
+Key Insights:
+• [insight 1]
+• [insight 2]
+• [insight 3]
+
+Topic: ${message}`;
+        break;
+
+      case 'video_recommendations':
+        systemPrompt += `
+
+Recommend high-quality YouTube channels and specific videos for financial literacy education.
+
+Focus on:
+- Well-established, credible financial educators
+- Channels with consistent, accurate content
+- Videos that are beginner-friendly but comprehensive
+- Diverse perspectives on personal finance topics
+
+Suggest specific channel names and video topics that would be most valuable for someone learning financial literacy.
+
+Request: ${message}`;
+        break;
+
+      default:
+        systemPrompt += `
+
+Your role:
+- Provide accurate, personalized financial advice
+- Help with budgeting, investing, saving, and financial planning
+- Educate users about financial literacy and security best practices
+- Be encouraging, professional, and easy to understand
+
+Guidelines:
+- Always prioritize user financial security and safety
+- Provide actionable, specific advice
+- Explain financial concepts in simple terms
+- Keep responses concise but informative (2-3 sentences usually)
+- Use a friendly but professional tone
+
+Current context: ${context || "General financial consultation"}
+
+User question: ${message}`;
+    }
+
+    const result = await model.generateContent(systemPrompt);
+    const response = await result.response;
+    const aiMessage = response.text();
+
+    res.json({
+      message: aiMessage,
+      timestamp: new Date().toISOString(),
+      context: context
+    });
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+
+    // Enhanced fallback responses based on context
+    const fallbackResponses = {
+      course_generation: generateCourseFallback(req.body.message),
+      article_generation: generateArticleFallback(req.body.message),
+      video_recommendations: getVideoRecommendationsFallback(),
+      investment: "I'd recommend starting with a diversified portfolio. Consider low-cost index funds for beginners - they offer broad market exposure with lower risk. What's your investment timeline and risk tolerance?",
+      budget: "Let's create a budget using the 50/30/20 rule: 50% for needs, 30% for wants, 20% for savings. What's your monthly after-tax income?",
+      security: "For better security, enable two-factor authentication on all financial accounts, use unique strong passwords, and be cautious of phishing emails. What specific security concern do you have?",
+      default: "I'm here to help with your financial and educational questions. Could you provide more details about what specific advice you're looking for?"
+    };
+
+    const context = req.body.context || 'default';
+    const message = req.body.message.toLowerCase();
+    
+    let fallbackMessage = fallbackResponses[context] || fallbackResponses.default;
+    
+    if (!fallbackResponses[context]) {
+      if (message.includes("invest") || message.includes("stock") || message.includes("portfolio")) {
+        fallbackMessage = fallbackResponses.investment;
+      } else if (message.includes("budget") || message.includes("expense") || message.includes("save")) {
+        fallbackMessage = fallbackResponses.budget;
+      } else if (message.includes("security") || message.includes("password") || message.includes("hack")) {
+        fallbackMessage = fallbackResponses.security;
+      }
+    }
+
+    res.json({
+      message: fallbackMessage,
+      timestamp: new Date().toISOString(),
+      fallback: true,
+      context: context
+    });
+  }
+});
+
+// Dedicated endpoint for generating course content
+app.post("/api/education/courses", async (req, res) => {
+  try {
+    const { topics } = req.body;
+    
+    if (!topics || !Array.isArray(topics)) {
+      return res.status(400).json({ error: "Topics array is required" });
+    }
+
+    const courses = [];
+    
+    for (const topic of topics) {
+      try {
+        const courseResponse = await fetch(`${req.protocol}://${req.get('host')}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: topic,
+            context: 'course_generation'
+          })
+        });
+        
+        if (courseResponse.ok) {
+          const data = await courseResponse.json();
+          const courseContent = parseCourseContent(data.message, topic);
+          courses.push({
+            ...courseContent,
+            topic: topic,
+            progress: Math.floor(Math.random() * 100),
+            icon: getCourseIcon(topic)
+          });
+        } else {
+          courses.push(generateCourseFallback(topic));
+        }
+      } catch (error) {
+        courses.push(generateCourseFallback(topic));
+      }
+    }
+
+    res.json({
+      courses: courses,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Course generation error:", error);
+    res.status(500).json({ error: "Failed to generate courses" });
+  }
+});
+
+// Dedicated endpoint for generating article content
+app.post("/api/education/articles", async (req, res) => {
+  try {
+    const { topics } = req.body;
+    
+    if (!topics || !Array.isArray(topics)) {
+      return res.status(400).json({ error: "Topics array is required" });
+    }
+
+    const articles = [];
+    
+    for (const topic of topics) {
+      try {
+        const articleResponse = await fetch(`${req.protocol}://${req.get('host')}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: topic,
+            context: 'article_generation'
+          })
+        });
+        
+        if (articleResponse.ok) {
+          const data = await articleResponse.json();
+          const articleContent = parseArticleContent(data.message, topic);
+          articles.push({
+            ...articleContent,
+            topic: topic,
+            readTime: `${Math.floor(Math.random() * 10) + 5} min read`,
+            publishDate: getRecentDate(),
+            views: `${(Math.random() * 20 + 5).toFixed(1)}K views`
+          });
+        } else {
+          articles.push(generateArticleFallback(topic));
+        }
+      } catch (error) {
+        articles.push(generateArticleFallback(topic));
+      }
+    }
+
+    res.json({
+      articles: articles,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Article generation error:", error);
+    res.status(500).json({ error: "Failed to generate articles" });
+  }
+});
+
+// Video recommendations endpoint
+app.get("/api/education/videos", async (req, res) => {
+  try {
+    // Curated high-quality financial literacy videos
+    const curatedVideos = [
+      {
+        title: "Personal Finance Basics in 10 Minutes",
+        channel: "Ben Felix",
+        videoId: "HQzoZfc3GwQ",
+        duration: "10:15",
+        views: "1.2M views",
+        description: "Essential personal finance concepts everyone should know",
+        category: "basics"
+      },
+      {
+        title: "How to Build Wealth (Starting with $0)",
+        channel: "The Plain Bagel",
+        videoId: "T71ibcZAX3I",
+        duration: "15:30", 
+        views: "850K views",
+        description: "Step-by-step guide to building wealth from nothing",
+        category: "wealth-building"
+      },
+      {
+        title: "Investing for Beginners - Complete Guide",
+        channel: "Two Cents",
+        videoId: "gFQNPmLKj1k",
+        duration: "12:45",
+        views: "2.1M views",
+        description: "Everything beginners need to know about investing",
+        category: "investing"
+      },
+      {
+        title: "Emergency Fund: How Much Do You Need?",
+        channel: "The Financial Diet",
+        videoId: "eBuBhf-xgJ8", 
+        duration: "8:20",
+        views: "445K views",
+        description: "Calculate the right emergency fund size for your situation",
+        category: "savings"
+      },
+      {
+        title: "Credit Score Explained Simply",
+        channel: "Andrei Jikh",
+        videoId: "HD4H0W2tOTM",
+        duration: "11:55",
+        views: "890K views", 
+        description: "Understanding credit scores and how to improve them",
+        category: "credit"
+      },
+      {
+        title: "Budgeting Methods That Actually Work",
+        channel: "Graham Stephan", 
+        videoId: "czJBKCHUsEY",
+        duration: "16:10",
+        views: "760K views",
+        description: "Practical budgeting strategies for real people",
+        category: "budgeting"
+      },
+      {
+        title: "Index Funds vs ETFs Explained",
+        channel: "Ben Felix",
+        videoId: "JVVPKzKF_yU",
+        duration: "14:25",
+        views: "920K views",
+        description: "Compare index funds and ETFs for passive investing",
+        category: "investing"
+      },
+      {
+        title: "The Psychology of Money",
+        channel: "The Swedish Investor",
+        videoId: "4j_cOsgRY7w",
+        duration: "19:45",
+        views: "650K views",
+        description: "Understanding behavioral finance and money mindset",
+        category: "psychology"
+      }
+    ];
+
+    // Add some randomization and filtering
+    const selectedVideos = curatedVideos
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 6);
+
+    res.json({
+      videos: selectedVideos,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Video recommendation error:", error);
+    res.status(500).json({ error: "Failed to get video recommendations" });
+  }
+});
+
+// Helper functions for content generation
+function parseCourseContent(aiResponse, fallbackTopic) {
+  try {
+    const lines = aiResponse.split('\n').filter(line => line.trim());
+    
+    let title = fallbackTopic;
+    let description = '';
+    let outcomes = [];
+    
+    const titleMatch = aiResponse.match(/Title:?\s*(.+?)(?:\n|$)/i);
+    if (titleMatch) {
+      title = titleMatch[1].trim().replace(/['"]/g, '').substring(0, 50);
+    }
+    
+    const descMatch = aiResponse.match(/Description:?\s*(.+?)(?:\n|$)/i);
+    if (descMatch) {
+      description = descMatch[1].trim().substring(0, 120);
+    }
+    
+    const bulletRegex = /[•\-\*]\s*(.+)/g;
+    let match;
+    while ((match = bulletRegex.exec(aiResponse)) !== null && outcomes.length < 4) {
+      outcomes.push(match[1].trim());
+    }
+    
+    return {
+      title: title || fallbackTopic,
+      description: description || `Learn essential ${fallbackTopic.toLowerCase()} skills.`,
+      outcomes: outcomes.length > 0 ? outcomes : ['Master key concepts', 'Apply practical strategies']
+    };
+  } catch (error) {
+    return generateCourseFallback(fallbackTopic);
+  }
+}
+
+function parseArticleContent(aiResponse, fallbackTopic) {
+  try {
+    const titleMatch = aiResponse.match(/Title:?\s*(.+?)(?:\n|$)/i);
+    const title = titleMatch ? titleMatch[1].trim().replace(/['"]/g, '').substring(0, 60) : fallbackTopic;
+    
+    const previewMatch = aiResponse.match(/(?:Preview|Summary):?\s*(.+?)(?:\n|$)/i);
+    const preview = previewMatch ? previewMatch[1].trim().substring(0, 150) : `Essential insights about ${fallbackTopic.toLowerCase()}`;
+    
+    const insights = [];
+    const bulletRegex = /[•\-\*]\s*(.+)/g;
+    let match;
+    while ((match = bulletRegex.exec(aiResponse)) !== null && insights.length < 3) {
+      insights.push(match[1].trim());
+    }
+    
+    return {
+      title: title,
+      preview: preview,
+      insights: insights.length > 0 ? insights : ['Expert analysis', 'Practical tips']
+    };
+  } catch (error) {
+    return generateArticleFallback(fallbackTopic);
+  }
+}
+
+function generateCourseFallback(topic) {
+  return {
+    title: topic,
+    description: `Learn essential ${topic.toLowerCase()} skills and strategies for better financial health.`,
+    outcomes: [`Understand ${topic} fundamentals`, 'Apply key concepts', 'Make informed decisions'],
+    progress: Math.floor(Math.random() * 100),
+    icon: getCourseIcon(topic)
+  };
+}
+
+function generateArticleFallback(topic) {
+  return {
+    title: topic,
+    preview: `Essential insights about ${topic.toLowerCase()} for your financial success.`,
+    insights: ['Current trends', 'Expert advice', 'Actionable strategies'],
+    readTime: `${Math.floor(Math.random() * 10) + 5} min read`,
+    publishDate: getRecentDate(),
+    views: `${(Math.random() * 20 + 5).toFixed(1)}K views`
+  };
+}
+
+function getVideoRecommendationsFallback() {
+  return "I recommend checking out channels like Ben Felix for evidence-based investing advice, The Plain Bagel for clear financial explanations, and Two Cents for comprehensive personal finance topics. These creators provide high-quality, beginner-friendly content.";
+}
+
+function getCourseIcon(topic) {
+  const iconMap = {
+    'Budgeting': 'fas fa-calculator',
+    'Credit': 'fas fa-credit-card', 
+    'Investment': 'fas fa-chart-line',
+    'Emergency': 'fas fa-piggy-bank',
+    'Debt': 'fas fa-hand-holding-usd',
+    'Retirement': 'fas fa-umbrella',
+    'Tax': 'fas fa-file-invoice-dollar',
+    'Insurance': 'fas fa-shield-alt',
+    'Real Estate': 'fas fa-home',
+    'Cryptocurrency': 'fas fa-coins'
+  };
+  
+  for (const [key, icon] of Object.entries(iconMap)) {
+    if (topic.toLowerCase().includes(key.toLowerCase())) {
+      return icon;
+    }
+  }
+  return 'fas fa-graduation-cap';
+}
+
+function getRecentDate() {
+  const dates = [
+    'Nov 28, 2024', 'Dec 1, 2024', 'Dec 5, 2024',
+    'Dec 8, 2024', 'Dec 12, 2024', 'Dec 15, 2024'
+  ];
+  return dates[Math.floor(Math.random() * dates.length)];
+}
+
+// Helper function to parse Gemini responses (existing code)
 function parseGeminiResponse(text, type = "url") {
   try {
     console.log("Raw Gemini Response:", text);
@@ -118,351 +580,13 @@ function parseGeminiResponse(text, type = "url") {
   }
 }
 
-// Market and Points System Endpoints
-
-// User points data storage (in production, use Supabase)
-let userPoints = {
-    'user123': {
-        points: 1250,
-        redeemedDiscounts: [],
-        activeDiscounts: []
-    }
-};
-
-// Local businesses data
-const localBusinesses = [
-    {
-        id: 'coffee-corner',
-        name: 'Coffee Corner',
-        category: 'food',
-        discount: '15% OFF',
-        pointsCost: 500,
-        description: 'Valid on all drinks and pastries. Expires in 30 days.',
-        location: '123 Main St',
-        distance: '0.5mi',
-        rating: 4.7,
-        image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300&h=200&fit=crop'
-    },
-    {
-        id: 'book-nook',
-        name: 'Book Nook',
-        category: 'retail',
-        discount: '20% OFF',
-        pointsCost: 800,
-        description: 'Valid on all books and merchandise. Expires in 45 days.',
-        location: '456 Oak Ave',
-        distance: '0.8mi',
-        rating: 4.9,
-        image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop'
-    },
-    {
-        id: 'fit-life',
-        name: 'Fit Life Gym',
-        category: 'services',
-        discount: '1 Month FREE',
-        pointsCost: 1500,
-        description: 'Valid for new members. Includes all amenities.',
-        location: '789 Fitness Rd',
-        distance: '1.2mi',
-        rating: 4.5,
-        image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&h=200&fit=crop'
-    },
-    {
-        id: 'pasta-paradise',
-        name: 'Pasta Paradise',
-        category: 'food',
-        discount: '25% OFF',
-        pointsCost: 1000,
-        description: 'Valid for parties up to 4. Excludes alcohol.',
-        location: '321 Italian Way',
-        distance: '0.3mi',
-        rating: 4.8,
-        image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=300&h=200&fit=crop'
-    },
-    {
-        id: 'cineplex',
-        name: 'Cineplex Theater',
-        category: 'entertainment',
-        discount: '2 Tickets + Popcorn',
-        pointsCost: 1200,
-        description: 'Valid any day except holidays. Includes regular popcorn.',
-        location: '555 Cinema Blvd',
-        distance: '2.1mi',
-        rating: 4.3,
-        image: 'https://images.unsplash.com/photo-1489599809519-364a47ae3cde?w=300&h=200&fit=crop'
-    },
-    {
-        id: 'style-studio',
-        name: 'Style Studio',
-        category: 'services',
-        discount: '30% OFF',
-        pointsCost: 600,
-        description: 'Valid on haircuts and styling. Expires in 60 days.',
-        location: '234 Beauty Ave',
-        distance: '0.7mi',
-        rating: 4.9,
-        image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop'
-    }
-];
-
-// GET user points
-app.get('/api/market/points', (req, res) => {
-    const userId = req.query.userId || 'user123'; // In production, use authentication
-    const user = userPoints[userId] || { points: 0, redeemedDiscounts: [], activeDiscounts: [] };
-    
-    res.json({
-        points: user.points,
-        redeemedCount: user.redeemedDiscounts.length,
-        activeCount: user.activeDiscounts.length,
-        discountValue: (user.points * 0.10).toFixed(2)
-    });
-});
-
-// GET local businesses
-app.get('/api/market/businesses', (req, res) => {
-    const category = req.query.category;
-    let businesses = localBusinesses;
-    
-    if (category && category !== 'all') {
-        businesses = localBusinesses.filter(business => business.category === category);
-    }
-    
-    res.json(businesses);
-});
-
-// POST redeem discount
-app.post('/api/market/redeem', (req, res) => {
-    const { userId, businessId, pointsCost } = req.body;
-    const user = userPoints[userId || 'user123'];
-    
-    if (!user) {
-        userPoints[userId || 'user123'] = {
-            points: 0,
-            redeemedDiscounts: [],
-            activeDiscounts: []
-        };
-    }
-    
-    const currentUser = userPoints[userId || 'user123'];
-    
-    if (currentUser.points < pointsCost) {
-        return res.status(400).json({ error: 'Insufficient points' });
-    }
-    
-    const business = localBusinesses.find(b => b.id === businessId);
-    if (!business) {
-        return res.status(404).json({ error: 'Business not found' });
-    }
-    
-    // Generate unique discount code
-    const discountCode = `FIN${Math.floor(1000 + Math.random() * 9000)}${businessId.slice(0, 3).toUpperCase()}`;
-    
-    // Calculate expiry date (30 days from now)
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30);
-    
-    const discount = {
-        id: Date.now().toString(),
-        businessId,
-        businessName: business.name,
-        discount: business.discount,
-        code: discountCode,
-        pointsCost,
-        redeemedAt: new Date().toISOString(),
-        expiresAt: expiryDate.toISOString(),
-        status: 'active'
-    };
-    
-    // Update user points and discounts
-    currentUser.points -= pointsCost;
-    currentUser.activeDiscounts.push(discount);
-    currentUser.redeemedDiscounts.push(discount);
-    
-    res.json({
-        success: true,
-        newPoints: currentUser.points,
-        discount: discount
-    });
-});
-
-// GET user active discounts
-app.get('/api/market/discounts', (req, res) => {
-    const userId = req.query.userId || 'user123';
-    const user = userPoints[userId];
-    
-    if (!user) {
-        return res.json({ discounts: [] });
-    }
-    
-    // Filter out expired discounts
-    const now = new Date();
-    user.activeDiscounts = user.activeDiscounts.filter(discount => 
-        new Date(discount.expiresAt) > now
-    );
-    
-    res.json({ discounts: user.activeDiscounts });
-});
-
-// POST add points from challenges
-app.post('/api/market/add-points', (req, res) => {
-    const { userId, points, challengeId } = req.body;
-    const user = userPoints[userId || 'user123'];
-    
-    if (!user) {
-        userPoints[userId || 'user123'] = {
-            points: points,
-            redeemedDiscounts: [],
-            activeDiscounts: []
-        };
-    } else {
-        user.points += points;
-    }
-    
-    // Log the points addition for analytics
-    console.log(`Added ${points} points to user ${userId} for challenge ${challengeId}`);
-    
-    res.json({ 
-        success: true, 
-        newPoints: userPoints[userId || 'user123'].points 
-    });
-});
-
-// GET market analytics for businesses
-app.get('/api/market/analytics', (req, res) => {
-    // This would provide data to businesses about redemption rates, etc.
-    const analytics = {
-        totalRedemptions: Object.values(userPoints).reduce((total, user) => 
-            total + user.redeemedDiscounts.length, 0
-        ),
-        totalPointsInCirculation: Object.values(userPoints).reduce((total, user) => 
-            total + user.points, 0
-        ),
-        popularBusinesses: localBusinesses.map(business => ({
-            ...business,
-            redemptions: Object.values(userPoints).reduce((total, user) => 
-                total + user.redeemedDiscounts.filter(d => d.businessId === business.id).length, 0
-            )
-        })).sort((a, b) => b.redemptions - a.redemptions)
-    };
-    
-    res.json(analytics);
-});
-
-// Serve market.html
-app.get("/market", (req, res) => {
-    res.sendFile(path.join(__dirname, "src", "frontend", "html", "market.html"));
-});
-
-// AI Chat endpoint for Gemini integration
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { message, context } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
-
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
-    });
-
-    const systemPrompt = `You are a professional Personal Financial Advisor and Cybersecurity Expert for FinSecure app. 
-
-Your role:
-- Provide accurate, personalized financial advice
-- Help with budgeting, investing, saving, and financial planning
-- Identify and warn about cybersecurity threats
-- Scan URLs and messages for potential fraud
-- Educate users about financial literacy and security best practices
-- Be encouraging, professional, and easy to understand
-
-Guidelines:
-- Always prioritize user financial security and safety
-- Provide actionable, specific advice
-- Explain financial concepts in simple terms
-- Include relevant cybersecurity warnings when appropriate
-- Keep responses concise but informative (2-3 sentences usually)
-- Use a friendly but professional tone
-
-Current context: ${context || "General financial and security consultation"}
-
-User question: ${message}`;
-
-    const result = await model.generateContent(systemPrompt);
-    const response = await result.response;
-    const aiMessage = response.text();
-
-    res.json({
-      message: aiMessage,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-
-    const fallbackResponses = {
-      investment:
-        "I'd recommend starting with a diversified portfolio. Consider low-cost index funds for beginners - they offer broad market exposure with lower risk. What's your investment timeline and risk tolerance?",
-      budget:
-        "Let's create a budget using the 50/30/20 rule: 50% for needs, 30% for wants, 20% for savings. What's your monthly after-tax income?",
-      security:
-        "For better security, enable two-factor authentication on all financial accounts, use unique strong passwords, and be cautious of phishing emails. What specific security concern do you have?",
-      scan: "I can help analyze links and messages for threats. Please share the URL or message content you'd like me to review for potential scams or phishing attempts.",
-      default:
-        "I'm here to help with your financial and security questions. Could you provide more details about what specific advice you're looking for?",
-    };
-
-    const message = req.body.message.toLowerCase();
-    let fallbackMessage = fallbackResponses.default;
-
-    if (
-      message.includes("invest") ||
-      message.includes("stock") ||
-      message.includes("portfolio")
-    ) {
-      fallbackMessage = fallbackResponses.investment;
-    } else if (
-      message.includes("budget") ||
-      message.includes("expense") ||
-      message.includes("save")
-    ) {
-      fallbackMessage = fallbackResponses.budget;
-    } else if (
-      message.includes("security") ||
-      message.includes("password") ||
-      message.includes("hack")
-    ) {
-      fallbackMessage = fallbackResponses.security;
-    } else if (
-      message.includes("scan") ||
-      message.includes("link") ||
-      message.includes("url")
-    ) {
-      fallbackMessage = fallbackResponses.scan;
-    }
-
-    res.json({
-      message: fallbackMessage,
-      timestamp: new Date().toISOString(),
-      fallback: true,
-    });
-  }
-});
-
-// URL scanning
-// URL scanning
+// URL scanning (existing code)
 app.post("/api/scan/url", async (req, res) => {
   try {
-    let { url } = req.body; // Only declare once
+    const { url } = req.body;
 
     if (!url) {
       return res.status(400).json({ error: "URL is required" });
-    }
-
-    // Auto-add https:// if no protocol is specified
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
     }
 
     console.log(`🔍 Scanning URL with Gemini AI: ${url}`);
@@ -524,7 +648,7 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format. Do not include any
   }
 });
 
-// Message scanning
+// Message scanning (existing code)
 app.post("/api/scan/message", async (req, res) => {
   try {
     const { content } = req.body;
@@ -581,7 +705,7 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format. Do not include any
   }
 });
 
-// Supabase users API
+// Supabase users API (existing code)
 app.get("/api/users", async (req, res) => {
   const { data, error } = await supabase.from("users").select("*");
   if (error) return res.status(400).json({ error: error.message });
@@ -592,8 +716,6 @@ app.get("/api/users", async (req, res) => {
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API endpoint not found" });
 });
-
-// ❌ Remove SPA fallback — let Express serve the real .html files instead
 
 // Start server
 const PORT = process.env.PORT || 5000;
