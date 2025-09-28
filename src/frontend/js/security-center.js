@@ -1,4 +1,243 @@
-// Security Center JavaScript
+// Enhanced Security Center JavaScript with Interactive Security Status
+
+// Security Assessment Data
+const securityCategories = {
+    passwords: {
+        name: 'Password Security',
+        weight: 20,
+        icon: 'fas fa-key',
+        questions: [
+            {
+                id: 'unique_passwords',
+                question: 'Do you use unique passwords for each financial account?',
+                options: [
+                    { text: 'Yes, all accounts have unique passwords', score: 100 },
+                    { text: 'Most accounts have unique passwords', score: 75 },
+                    { text: 'Some accounts share passwords', score: 40 },
+                    { text: 'I reuse passwords across accounts', score: 10 }
+                ]
+            },
+            {
+                id: 'password_strength',
+                question: 'How complex are your passwords?',
+                options: [
+                    { text: '12+ characters with letters, numbers, symbols', score: 100 },
+                    { text: '8+ characters with letters and numbers', score: 70 },
+                    { text: 'Basic passwords with letters only', score: 30 },
+                    { text: 'Simple passwords or common words', score: 10 }
+                ]
+            }
+        ]
+    },
+    twoFactor: {
+        name: 'Two-Factor Authentication',
+        weight: 25,
+        icon: 'fas fa-shield-alt',
+        questions: [
+            {
+                id: 'twofa_coverage',
+                question: 'How many financial accounts have 2FA enabled?',
+                options: [
+                    { text: 'All accounts (100%)', score: 100 },
+                    { text: 'Most accounts (75%+)', score: 80 },
+                    { text: 'Some accounts (25-75%)', score: 50 },
+                    { text: 'Few or no accounts', score: 10 }
+                ]
+            },
+            {
+                id: 'twofa_type',
+                question: 'What type of 2FA do you primarily use?',
+                options: [
+                    { text: 'Authenticator app or hardware token', score: 100 },
+                    { text: 'SMS text messages', score: 60 },
+                    { text: 'Email verification', score: 40 },
+                    { text: 'No 2FA currently used', score: 0 }
+                ]
+            }
+        ]
+    },
+    monitoring: {
+        name: 'Account Monitoring',
+        weight: 20,
+        icon: 'fas fa-eye',
+        questions: [
+            {
+                id: 'statement_review',
+                question: 'How often do you review your bank statements?',
+                options: [
+                    { text: 'Weekly or more frequently', score: 100 },
+                    { text: 'Monthly when they arrive', score: 80 },
+                    { text: 'Quarterly or occasionally', score: 40 },
+                    { text: 'Rarely or never', score: 10 }
+                ]
+            },
+            {
+                id: 'alerts_enabled',
+                question: 'Do you have transaction alerts set up?',
+                options: [
+                    { text: 'Yes, for all transactions', score: 100 },
+                    { text: 'Yes, for large transactions only', score: 70 },
+                    { text: 'Some alerts enabled', score: 40 },
+                    { text: 'No alerts enabled', score: 10 }
+                ]
+            }
+        ]
+    },
+    deviceSecurity: {
+        name: 'Device Security',
+        weight: 15,
+        icon: 'fas fa-laptop-medical',
+        questions: [
+            {
+                id: 'antivirus_software',
+                question: 'Do you use updated antivirus/security software?',
+                options: [
+                    { text: 'Yes, premium security suite', score: 100 },
+                    { text: 'Yes, basic antivirus software', score: 70 },
+                    { text: 'Built-in security only', score: 50 },
+                    { text: 'No security software', score: 10 }
+                ]
+            },
+            {
+                id: 'software_updates',
+                question: 'How do you handle software updates?',
+                options: [
+                    { text: 'Automatic updates enabled', score: 100 },
+                    { text: 'Regular manual updates', score: 80 },
+                    { text: 'Occasional updates', score: 40 },
+                    { text: 'Rarely update software', score: 10 }
+                ]
+            }
+        ]
+    },
+    safePractices: {
+        name: 'Safe Banking Practices',
+        weight: 20,
+        icon: 'fas fa-user-shield',
+        questions: [
+            {
+                id: 'public_wifi',
+                question: 'Do you use public WiFi for banking?',
+                options: [
+                    { text: 'Never use public WiFi for banking', score: 100 },
+                    { text: 'Only with VPN protection', score: 80 },
+                    { text: 'Occasionally for urgent needs', score: 30 },
+                    { text: 'Regularly use public WiFi', score: 10 }
+                ]
+            },
+            {
+                id: 'suspicious_handling',
+                question: 'How do you handle suspicious emails/calls?',
+                options: [
+                    { text: 'Always verify independently', score: 100 },
+                    { text: 'Usually check before responding', score: 80 },
+                    { text: 'Sometimes fall for convincing scams', score: 30 },
+                    { text: 'Often respond without verification', score: 10 }
+                ]
+            }
+        ]
+    }
+};
+
+// Security Status Management
+class SecurityStatusManager {
+    constructor() {
+        this.userScores = this.loadUserScores();
+        this.assessmentComplete = localStorage.getItem('securityAssessmentComplete') === 'true';
+        this.lastAssessment = localStorage.getItem('lastSecurityAssessment');
+    }
+
+    loadUserScores() {
+        const saved = localStorage.getItem('userSecurityScores');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    saveUserScores() {
+        localStorage.setItem('userSecurityScores', JSON.stringify(this.userScores));
+        localStorage.setItem('securityAssessmentComplete', 'true');
+        localStorage.setItem('lastSecurityAssessment', new Date().toISOString());
+    }
+
+    calculateOverallScore() {
+        if (Object.keys(this.userScores).length === 0) return 0;
+
+        let weightedScore = 0;
+        let totalWeight = 0;
+
+        Object.keys(securityCategories).forEach(categoryId => {
+            const category = securityCategories[categoryId];
+            const categoryScore = this.calculateCategoryScore(categoryId);
+            
+            if (categoryScore !== null) {
+                weightedScore += categoryScore * category.weight;
+                totalWeight += category.weight;
+            }
+        });
+
+        return totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 0;
+    }
+
+    calculateCategoryScore(categoryId) {
+        const userAnswers = this.userScores[categoryId];
+        if (!userAnswers) return null;
+
+        const category = securityCategories[categoryId];
+        let totalScore = 0;
+        let questionCount = 0;
+
+        category.questions.forEach(question => {
+            const userAnswer = userAnswers[question.id];
+            if (userAnswer !== undefined) {
+                totalScore += userAnswer;
+                questionCount++;
+            }
+        });
+
+        return questionCount > 0 ? totalScore / questionCount : null;
+    }
+
+    getSecurityLevel(score) {
+        if (score >= 90) return { level: 'Excellent', color: '#22c55e', description: 'Outstanding security practices' };
+        if (score >= 75) return { level: 'Good', color: '#22c55e', description: 'Above average security practices' };
+        if (score >= 60) return { level: 'Fair', color: '#f59e0b', description: 'Room for improvement' };
+        if (score >= 40) return { level: 'Poor', color: '#ef4444', description: 'Significant security risks' };
+        return { level: 'Critical', color: '#dc2626', description: 'Immediate attention needed' };
+    }
+
+    getRecommendations() {
+        const recommendations = [];
+        
+        Object.keys(securityCategories).forEach(categoryId => {
+            const score = this.calculateCategoryScore(categoryId);
+            const category = securityCategories[categoryId];
+            
+            if (score !== null && score < 75) {
+                recommendations.push({
+                    category: category.name,
+                    icon: category.icon,
+                    priority: score < 50 ? 'high' : 'medium',
+                    action: this.getCategoryRecommendation(categoryId, score)
+                });
+            }
+        });
+
+        return recommendations.sort((a, b) => {
+            const priorityOrder = { high: 3, medium: 2, low: 1 };
+            return priorityOrder[b.priority] - priorityOrder[a.priority];
+        });
+    }
+
+    getCategoryRecommendation(categoryId, score) {
+        const recommendations = {
+            passwords: score < 50 ? 'Use a password manager and create unique, strong passwords' : 'Strengthen remaining weak passwords',
+            twoFactor: score < 50 ? 'Enable 2FA on all financial accounts immediately' : 'Switch from SMS to app-based 2FA',
+            monitoring: score < 50 ? 'Set up account alerts and review statements weekly' : 'Increase monitoring frequency',
+            deviceSecurity: score < 50 ? 'Install security software and enable automatic updates' : 'Upgrade to comprehensive security suite',
+            safePractices: score < 50 ? 'Never use public WiFi for banking and verify all suspicious communications' : 'Use VPN when necessary and stay vigilant'
+        };
+        return recommendations[categoryId] || 'Improve security practices in this area';
+    }
+}
 
 // DOM Elements
 const securityCenter = document.getElementById('security-center');
@@ -20,61 +259,334 @@ const backFromProtect = document.getElementById('back-from-protect');
 const backFromDigital = document.getElementById('back-from-digital');
 const backFromOther = document.getElementById('back-from-other');
 
-// Modals
-const reportFraudModal = document.getElementById('report-fraud-modal');
-const scamDetailsModal = document.getElementById('scam-details-modal');
-const closeReportModal = document.getElementById('close-report-modal');
-const closeScamModal = document.getElementById('close-scam-modal');
-const howItWorksBtn = document.getElementById('how-it-works-btn');
-const reportFromModal = document.getElementById('report-from-modal');
+// Security Status Elements
+const securityStatusCard = document.querySelector('.status-card');
+const statusValue = document.querySelector('.status-value');
+const statusText = document.querySelector('.status-text');
+const improveSecurityBtn = document.querySelector('.card-btn.secondary');
 
-// Safety Tips Modals
-const identityTheftTips = document.getElementById('identity-theft-tips');
-const closeSafetyTips = document.querySelectorAll('.close-safety-tips');
-
-// Protection Tabs
-const protectionTabs = document.querySelectorAll('.protection-tab');
-const protectionSections = document.querySelectorAll('.protection-section');
-
-// Digital Fraud Tabs
-const digitalTabs = document.querySelectorAll('.digital-tab');
-const digitalSections = document.querySelectorAll('.digital-section');
-
-// Other Fraud Tabs
-const otherTabs = document.querySelectorAll('.other-tab');
-const otherSections = document.querySelectorAll('.other-section');
-
-// Fraud Type Buttons
-const fraudTypeBtns = document.querySelectorAll('.fraud-type-btn');
-const atmDosDontsBtn = document.getElementById('atm-dos-donts');
-
-// AI Widget
-const aiWidget = document.getElementById('ai-widget');
-const aiFab = document.getElementById('ai-fab');
-const closeAiWidget = document.getElementById('close-ai-widget');
-const aiInput = document.getElementById('ai-input');
-const sendAiMessage = document.getElementById('send-ai-message');
-const aiMessages = document.getElementById('ai-messages');
+// Initialize Security Status Manager
+const securityManager = new SecurityStatusManager();
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    // Set initial active page
     showPage(securityCenter);
-    
-    // Add event listeners
     setupEventListeners();
-    
-    // Initialize animations
     initAnimations();
-    
-    // Create dynamic modals
     createDynamicModals();
+    updateSecurityStatus();
+    
+    // Show assessment if not completed
+    if (!securityManager.assessmentComplete) {
+        setTimeout(() => showSecurityAssessment(), 2000);
+    }
 });
 
-// Set up all event listeners
+// Update security status display
+function updateSecurityStatus() {
+    const score = securityManager.calculateOverallScore();
+    const securityLevel = securityManager.getSecurityLevel(score);
+    
+    // Update the circular progress
+    const circle = document.querySelector('.circle');
+    if (circle) {
+        const circumference = 2 * Math.PI * 15.9155;
+        const strokeDasharray = `${(score / 100) * circumference}, ${circumference}`;
+        circle.style.strokeDasharray = strokeDasharray;
+        circle.style.stroke = securityLevel.color;
+    }
+    
+    // Update status text and value
+    if (statusValue) statusValue.textContent = `${score}%`;
+    if (statusText) statusText.textContent = `${securityLevel.level} - ${securityLevel.description}`;
+    
+    // Update status value color
+    if (statusValue) statusValue.style.color = securityLevel.color;
+}
+
+// Show security assessment modal
+function showSecurityAssessment() {
+    const assessmentModal = createSecurityAssessmentModal();
+    document.body.appendChild(assessmentModal);
+    toggleModal(assessmentModal);
+}
+
+// Create security assessment modal
+function createSecurityAssessmentModal() {
+    const modal = document.createElement('dialog');
+    modal.className = 'modal';
+    modal.id = 'security-assessment-modal';
+    
+    modal.innerHTML = `
+        <article class="modal-content" style="max-width: 700px; max-height: 90vh;">
+            <header class="modal-header">
+                <h2>Security Assessment</h2>
+                <button class="modal-close" id="close-assessment-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+            <section class="modal-body" style="overflow-y: auto;">
+                <p style="color: #94a3b8; margin-bottom: 1.5rem;">
+                    Help us evaluate your current security practices to provide personalized recommendations.
+                </p>
+                <div id="assessment-content">
+                    ${createAssessmentContent()}
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: flex-end;">
+                    <button class="card-btn secondary" id="skip-assessment">Skip for Now</button>
+                    <button class="card-btn" id="submit-assessment">
+                        <i class="fas fa-check"></i>
+                        Complete Assessment
+                    </button>
+                </div>
+            </section>
+        </article>
+    `;
+    
+    // Add event listeners
+    modal.querySelector('#close-assessment-modal').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('#skip-assessment').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('#submit-assessment').addEventListener('click', () => {
+        submitSecurityAssessment(modal);
+    });
+    
+    return modal;
+}
+
+// Create assessment content
+function createAssessmentContent() {
+    let content = '';
+    
+    Object.keys(securityCategories).forEach(categoryId => {
+        const category = securityCategories[categoryId];
+        content += `
+            <div class="assessment-category" style="margin-bottom: 2rem; background: rgba(30, 41, 59, 0.6); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.1);">
+                <h3 style="color: #f8fafc; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="${category.icon}" style="color: #22c55e;"></i>
+                    ${category.name}
+                </h3>
+                ${category.questions.map(question => `
+                    <div class="question-block" style="margin-bottom: 1.5rem;">
+                        <p style="color: #e2e8f0; margin-bottom: 0.75rem; font-weight: 500;">${question.question}</p>
+                        <div class="question-options">
+                            ${question.options.map((option, index) => `
+                                <label class="option-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.3s ease;">
+                                    <input type="radio" name="${question.id}" value="${option.score}" style="margin-right: 0.5rem;">
+                                    <span style="color: #94a3b8;">${option.text}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    });
+    
+    return content;
+}
+
+// Submit security assessment
+function submitSecurityAssessment(modal) {
+    const formData = new FormData();
+    const inputs = modal.querySelectorAll('input[type="radio"]:checked');
+    
+    // Reset scores
+    securityManager.userScores = {};
+    
+    // Process answers by category
+    Object.keys(securityCategories).forEach(categoryId => {
+        securityManager.userScores[categoryId] = {};
+        
+        securityCategories[categoryId].questions.forEach(question => {
+            const input = modal.querySelector(`input[name="${question.id}"]:checked`);
+            if (input) {
+                securityManager.userScores[categoryId][question.id] = parseInt(input.value);
+            }
+        });
+    });
+    
+    // Save and update
+    securityManager.saveUserScores();
+    securityManager.assessmentComplete = true;
+    
+    // Update display
+    updateSecurityStatus();
+    
+    // Show completion message
+    showAssessmentComplete();
+    
+    // Close modal
+    document.body.removeChild(modal);
+}
+
+// Show assessment completion
+function showAssessmentComplete() {
+    const score = securityManager.calculateOverallScore();
+    const level = securityManager.getSecurityLevel(score);
+    
+    // Create a temporary notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: rgba(30, 41, 59, 0.95);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: #f8fafc;
+        z-index: 1000;
+        max-width: 350px;
+        animation: slideInRight 0.5s ease;
+    `;
+    
+    notification.innerHTML = `
+        <h3 style="color: #22c55e; margin-bottom: 0.5rem;">Assessment Complete!</h3>
+        <p style="margin-bottom: 0.5rem;">Your security score: <strong style="color: ${level.color};">${score}%</strong></p>
+        <p style="font-size: 0.9rem; color: #94a3b8;">${level.description}</p>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Create improved security breakdown modal
+function createSecurityBreakdownModal() {
+    const modal = document.createElement('dialog');
+    modal.className = 'modal';
+    modal.id = 'security-breakdown-modal';
+    
+    const overallScore = securityManager.calculateOverallScore();
+    const recommendations = securityManager.getRecommendations();
+    
+    modal.innerHTML = `
+        <article class="modal-content" style="max-width: 800px; max-height: 90vh;">
+            <header class="modal-header">
+                <h2>Security Breakdown & Recommendations</h2>
+                <button class="modal-close" id="close-breakdown-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+            <section class="modal-body" style="overflow-y: auto;">
+                ${createSecurityBreakdownContent()}
+                ${createRecommendationsContent(recommendations)}
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; justify-content: center;">
+                    <button class="card-btn" id="retake-assessment">
+                        <i class="fas fa-redo"></i>
+                        Retake Assessment
+                    </button>
+                    <button class="card-btn secondary" id="view-education">
+                        <i class="fas fa-graduation-cap"></i>
+                        View Education Hub
+                    </button>
+                </div>
+            </section>
+        </article>
+    `;
+    
+    // Add event listeners
+    modal.querySelector('#close-breakdown-modal').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('#retake-assessment').addEventListener('click', () => {
+        document.body.removeChild(modal);
+        showSecurityAssessment();
+    });
+    
+    modal.querySelector('#view-education').addEventListener('click', () => {
+        document.body.removeChild(modal);
+        // Navigate to education hub
+        window.location.href = 'education.html';
+    });
+    
+    return modal;
+}
+
+// Create security breakdown content
+function createSecurityBreakdownContent() {
+    let content = '<h3 style="color: #f8fafc; margin-bottom: 1rem;">Category Breakdown</h3>';
+    content += '<div class="category-breakdown" style="display: grid; gap: 1rem; margin-bottom: 2rem;">';
+    
+    Object.keys(securityCategories).forEach(categoryId => {
+        const category = securityCategories[categoryId];
+        const score = securityManager.calculateCategoryScore(categoryId) || 0;
+        const level = securityManager.getSecurityLevel(score);
+        
+        content += `
+            <div class="category-item" style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: 8px; border-left: 4px solid ${level.color};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h4 style="color: #f8fafc; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="${category.icon}" style="color: #22c55e;"></i>
+                        ${category.name}
+                    </h4>
+                    <span style="color: ${level.color}; font-weight: 600;">${Math.round(score)}%</span>
+                </div>
+                <div class="progress-bar" style="width: 100%; height: 6px; background: rgba(100, 116, 139, 0.3); border-radius: 3px; overflow: hidden;">
+                    <div class="progress" style="width: ${score}%; height: 100%; background: linear-gradient(90deg, ${level.color}, ${level.color}); transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+        `;
+    });
+    
+    content += '</div>';
+    return content;
+}
+
+// Create recommendations content
+function createRecommendationsContent(recommendations) {
+    if (recommendations.length === 0) {
+        return `
+            <div style="text-align: center; padding: 2rem; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.2);">
+                <i class="fas fa-trophy" style="font-size: 3rem; color: #22c55e; margin-bottom: 1rem;"></i>
+                <h3 style="color: #22c55e; margin-bottom: 0.5rem;">Excellent Security!</h3>
+                <p style="color: #94a3b8;">Your security practices are outstanding. Keep up the great work!</p>
+            </div>
+        `;
+    }
+    
+    let content = '<h3 style="color: #f8fafc; margin-bottom: 1rem;">Recommended Improvements</h3>';
+    content += '<div class="recommendations-list" style="display: flex; flex-direction: column; gap: 1rem;">';
+    
+    recommendations.forEach((rec, index) => {
+        const priorityColor = rec.priority === 'high' ? '#ef4444' : '#f59e0b';
+        const priorityText = rec.priority === 'high' ? 'High Priority' : 'Medium Priority';
+        
+        content += `
+            <div class="recommendation-item" style="background: rgba(30, 41, 59, 0.6); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${priorityColor};">
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                    <i class="${rec.icon}" style="font-size: 1.5rem; color: #22c55e; margin-top: 0.25rem;"></i>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 0.5rem;">
+                            <h4 style="color: #f8fafc; margin-bottom: 0.25rem;">${rec.category}</h4>
+                            <span style="background: rgba(239, 68, 68, 0.2); color: ${priorityColor}; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-left: auto;">${priorityText}</span>
+                        </div>
+                        <p style="color: #94a3b8; line-height: 1.5;">${rec.action}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    content += '</div>';
+    return content;
+}
+
+// Enhanced event listeners setup
 function setupEventListeners() {
     // Navigation buttons
-    reportFraudBtn?.addEventListener('click', () => toggleModal(reportFraudModal));
+    reportFraudBtn?.addEventListener('click', () => toggleModal(document.getElementById('report-fraud-modal')));
     latestScamBtn?.addEventListener('click', () => showPage(latestScamPage));
     protectYourselfBtn?.addEventListener('click', () => showPage(protectYourselfPage));
     digitalFraudBtn?.addEventListener('click', () => showPage(digitalFraudPage));
@@ -86,13 +598,31 @@ function setupEventListeners() {
     backFromDigital?.addEventListener('click', () => showPage(securityCenter));
     backFromOther?.addEventListener('click', () => showPage(securityCenter));
     
+    // Enhanced Improve Security button
+    improveSecurityBtn?.addEventListener('click', () => {
+        const modal = createSecurityBreakdownModal();
+        document.body.appendChild(modal);
+        toggleModal(modal);
+    });
+    
+    // Rest of the existing event listeners...
+    setupExistingEventListeners();
+}
+
+// Keep existing event listeners
+function setupExistingEventListeners() {
     // Modal controls
-    closeReportModal?.addEventListener('click', () => toggleModal(reportFraudModal));
-    closeScamModal?.addEventListener('click', () => toggleModal(scamDetailsModal));
-    howItWorksBtn?.addEventListener('click', () => toggleModal(scamDetailsModal));
+    const closeReportModal = document.getElementById('close-report-modal');
+    const closeScamModal = document.getElementById('close-scam-modal');
+    const howItWorksBtn = document.getElementById('how-it-works-btn');
+    const reportFromModal = document.getElementById('report-from-modal');
+    
+    closeReportModal?.addEventListener('click', () => toggleModal(document.getElementById('report-fraud-modal')));
+    closeScamModal?.addEventListener('click', () => toggleModal(document.getElementById('scam-details-modal')));
+    howItWorksBtn?.addEventListener('click', () => toggleModal(document.getElementById('scam-details-modal')));
     reportFromModal?.addEventListener('click', () => {
-        toggleModal(scamDetailsModal);
-        toggleModal(reportFraudModal);
+        toggleModal(document.getElementById('scam-details-modal'));
+        toggleModal(document.getElementById('report-fraud-modal'));
     });
     
     // Close modals when clicking outside
@@ -110,6 +640,7 @@ function setupEventListeners() {
     document.getElementById('simswap-safety-tips')?.addEventListener('click', () => showSafetyTipsModal('simswap'));
     
     // Protection tabs
+    const protectionTabs = document.querySelectorAll('.protection-tab');
     protectionTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabId = this.getAttribute('data-tab');
@@ -118,6 +649,7 @@ function setupEventListeners() {
     });
     
     // Digital fraud tabs
+    const digitalTabs = document.querySelectorAll('.digital-tab');
     digitalTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabId = this.getAttribute('data-tab');
@@ -126,6 +658,7 @@ function setupEventListeners() {
     });
     
     // Other fraud tabs
+    const otherTabs = document.querySelectorAll('.other-tab');
     otherTabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabId = this.getAttribute('data-tab');
@@ -134,6 +667,7 @@ function setupEventListeners() {
     });
     
     // Card Fraud Type Buttons
+    const fraudTypeBtns = document.querySelectorAll('.fraud-type-btn');
     fraudTypeBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const fraudType = this.getAttribute('data-type');
@@ -142,9 +676,15 @@ function setupEventListeners() {
     });
     
     // ATM Do's and Don'ts
+    const atmDosDontsBtn = document.getElementById('atm-dos-donts');
     atmDosDontsBtn?.addEventListener('click', showAtmDosDontsModal);
     
     // AI Widget
+    const aiFab = document.getElementById('ai-fab');
+    const closeAiWidget = document.getElementById('close-ai-widget');
+    const sendAiMessage = document.getElementById('send-ai-message');
+    const aiInput = document.getElementById('ai-input');
+    
     aiFab?.addEventListener('click', toggleAiWidget);
     closeAiWidget?.addEventListener('click', toggleAiWidget);
     sendAiMessage?.addEventListener('click', sendAiMessageHandler);
@@ -234,21 +774,127 @@ function createDynamicModals() {
         </dialog>
     `;
     
-    // Add modals to the page
-    modalContainer.insertAdjacentHTML('beforeend', safetyTipsModalHTML);
-    modalContainer.insertAdjacentHTML('beforeend', cardFraudModalHTML);
-    modalContainer.insertAdjacentHTML('beforeend', atmModalHTML);
+    // Report Fraud Modal HTML
+    const reportFraudModalHTML = `
+        <dialog class="modal" id="report-fraud-modal">
+            <article class="modal-content">
+                <header class="modal-header">
+                    <h2>Report Fraud - National Hotlines</h2>
+                    <button class="modal-close" id="close-report-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </header>
+                <section class="modal-body">
+                    <p>If you suspect fraudulent activity, contact these national hotlines immediately:</p>
+                    
+                    <section class="hotline-list">
+                        <article class="hotline-item">
+                            <h3>National Fraud Hotline</h3>
+                            <p><i class="fas fa-phone"></i> 1-800-123-4567</p>
+                            <p>Available 24/7 for reporting financial fraud</p>
+                        </article>
+                        
+                        <article class="hotline-item">
+                            <h3>Identity Theft Hotline</h3>
+                            <p><i class="fas fa-phone"></i> 1-888-987-6543</p>
+                            <p>Specialized assistance for identity theft cases</p>
+                        </article>
+                        
+                        <article class="hotline-item">
+                            <h3>Cyber Crime Unit</h3>
+                            <p><i class="fas fa-phone"></i> 1-877-555-7890</p>
+                            <p>Report online scams and digital fraud</p>
+                        </article>
+                    </section>
+                    
+                    <section class="emergency-tips">
+                        <h3>What to Do Immediately:</h3>
+                        <ul>
+                            <li>Contact your bank to freeze affected accounts</li>
+                            <li>Change all online passwords</li>
+                            <li>Monitor your credit reports</li>
+                            <li>File a police report if significant funds are involved</li>
+                        </ul>
+                    </section>
+                </section>
+            </article>
+        </dialog>
+    `;
+    
+    // Scam Details Modal HTML
+    const scamDetailsModalHTML = `
+        <dialog class="modal" id="scam-details-modal">
+            <article class="modal-content">
+                <header class="modal-header">
+                    <h2>How the Scam Works</h2>
+                    <button class="modal-close" id="close-scam-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </header>
+                <section class="modal-body">
+                    <section class="scam-steps">
+                        <h3>Step-by-Step Breakdown:</h3>
+                        <ol>
+                            <li>Scammers send emails that appear to be from legitimate banks</li>
+                            <li>Emails create urgency by claiming suspicious account activity</li>
+                            <li>Recipients are directed to click a link to "verify" their account</li>
+                            <li>The link goes to a fake website that mimics the real bank's login page</li>
+                            <li>Victims enter their credentials, which are captured by scammers</li>
+                            <li>Scammers use these credentials to access real bank accounts</li>
+                        </ol>
+                    </section>
+                    
+                    <section class="protect-yourself">
+                        <h3>Protect Yourself:</h3>
+                        <ul>
+                            <li>Never click links in unsolicited emails</li>
+                            <li>Always navigate to your bank's website directly</li>
+                            <li>Check for HTTPS and security certificates</li>
+                            <li>Enable two-factor authentication on all accounts</li>
+                            <li>Regularly monitor your account statements</li>
+                        </ul>
+                    </section>
+                    
+                    <section class="report-reminder">
+                        <h3>Report This Scam:</h3>
+                        <p>If you encounter this scam, report it immediately using the numbers in our <strong>Report Fraud</strong> section.</p>
+                        <button class="card-btn" id="report-from-modal">
+                            <i class="fas fa-phone-alt"></i>
+                            Report Now
+                        </button>
+                    </section>
+                </section>
+            </article>
+        </dialog>
+    `;
+    
+    // Add modals to the page if they don't exist
+    if (!document.getElementById('safety-tips-modal')) {
+        modalContainer.insertAdjacentHTML('beforeend', safetyTipsModalHTML);
+    }
+    if (!document.getElementById('card-fraud-modal')) {
+        modalContainer.insertAdjacentHTML('beforeend', cardFraudModalHTML);
+    }
+    if (!document.getElementById('atm-modal')) {
+        modalContainer.insertAdjacentHTML('beforeend', atmModalHTML);
+    }
+    if (!document.getElementById('report-fraud-modal')) {
+        modalContainer.insertAdjacentHTML('beforeend', reportFraudModalHTML);
+    }
+    if (!document.getElementById('scam-details-modal')) {
+        modalContainer.insertAdjacentHTML('beforeend', scamDetailsModalHTML);
+    }
     
     // Add event listeners for new modals
-    document.getElementById('close-safety-tips-modal').addEventListener('click', () => {
+    document.getElementById('close-safety-tips-modal')?.addEventListener('click', () => {
         toggleModal(document.getElementById('safety-tips-modal'));
     });
     
-    document.getElementById('close-card-fraud-modal').addEventListener('click', () => {
+    document.getElementById('close-card-fraud-modal')?.addEventListener('click', () => {
         toggleModal(document.getElementById('card-fraud-modal'));
     });
     
-    document.getElementById('close-atm-modal').addEventListener('click', () => {
+    document.getElementById('close-atm-modal')?.addEventListener('click', () => {
         toggleModal(document.getElementById('atm-modal'));
     });
 }
@@ -258,6 +904,8 @@ function showSafetyTipsModal(type) {
     const modal = document.getElementById('safety-tips-modal');
     const title = document.getElementById('safety-tips-title');
     const content = document.getElementById('safety-tips-content');
+    
+    if (!modal || !title || !content) return;
     
     const safetyTipsData = {
         'identity-theft': {
@@ -399,10 +1047,11 @@ function showSafetyTipsModal(type) {
     };
     
     const data = safetyTipsData[type];
-    title.textContent = data.title;
-    content.innerHTML = data.content;
-    
-    toggleModal(modal);
+    if (data) {
+        title.textContent = data.title;
+        content.innerHTML = data.content;
+        toggleModal(modal);
+    }
 }
 
 // Show card fraud modal with specific content
@@ -410,6 +1059,8 @@ function showCardFraudModal(type) {
     const modal = document.getElementById('card-fraud-modal');
     const title = document.getElementById('card-fraud-title');
     const content = document.getElementById('card-fraud-content');
+    
+    if (!modal || !title || !content) return;
     
     const cardFraudData = {
         'counterfeit': {
@@ -523,20 +1174,25 @@ function showCardFraudModal(type) {
     };
     
     const data = cardFraudData[type];
-    title.textContent = data.title;
-    content.innerHTML = data.content;
-    
-    toggleModal(modal);
+    if (data) {
+        title.textContent = data.title;
+        content.innerHTML = data.content;
+        toggleModal(modal);
+    }
 }
 
 // Show ATM Do's and Don'ts modal
 function showAtmDosDontsModal() {
     const modal = document.getElementById('atm-modal');
-    toggleModal(modal);
+    if (modal) {
+        toggleModal(modal);
+    }
 }
 
 // Show a specific page and hide others
 function showPage(page) {
+    if (!page) return;
+    
     // Hide all pages
     const pages = document.querySelectorAll('.content-section');
     pages.forEach(p => p.classList.remove('active'));
@@ -563,6 +1219,9 @@ function toggleModal(modal) {
 
 // Switch protection tabs
 function switchProtectionTab(tabId) {
+    const protectionTabs = document.querySelectorAll('.protection-tab');
+    const protectionSections = document.querySelectorAll('.protection-section');
+    
     // Remove active class from all tabs and sections
     protectionTabs.forEach(tab => tab.classList.remove('active'));
     protectionSections.forEach(section => section.classList.remove('active'));
@@ -577,6 +1236,9 @@ function switchProtectionTab(tabId) {
 
 // Switch digital fraud tabs
 function switchDigitalTab(tabId) {
+    const digitalTabs = document.querySelectorAll('.digital-tab');
+    const digitalSections = document.querySelectorAll('.digital-section');
+    
     // Remove active class from all tabs and sections
     digitalTabs.forEach(tab => tab.classList.remove('active'));
     digitalSections.forEach(section => section.classList.remove('active'));
@@ -591,6 +1253,9 @@ function switchDigitalTab(tabId) {
 
 // Switch other fraud tabs
 function switchOtherTab(tabId) {
+    const otherTabs = document.querySelectorAll('.other-tab');
+    const otherSections = document.querySelectorAll('.other-section');
+    
     // Remove active class from all tabs and sections
     otherTabs.forEach(tab => tab.classList.remove('active'));
     otherSections.forEach(section => section.classList.remove('active'));
@@ -605,6 +1270,7 @@ function switchOtherTab(tabId) {
 
 // Toggle AI Widget
 function toggleAiWidget() {
+    const aiWidget = document.getElementById('ai-widget');
     if (aiWidget) {
         aiWidget.classList.toggle('active');
     }
@@ -614,6 +1280,7 @@ function toggleAiWidget() {
 function sendAiMessageHandler(e) {
     if (e) e.preventDefault();
     
+    const aiInput = document.getElementById('ai-input');
     if (!aiInput) return;
     
     const message = aiInput.value.trim();
@@ -634,6 +1301,7 @@ function sendAiMessageHandler(e) {
 
 // Add message to AI chat
 function addAiMessage(message, sender) {
+    const aiMessages = document.getElementById('ai-messages');
     if (!aiMessages) return;
     
     const messageDiv = document.createElement('article');
@@ -653,7 +1321,9 @@ function addAiMessage(message, sender) {
 function getAiResponse(message) {
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('fraud') || lowerMessage.includes('scam')) {
+    if (lowerMessage.includes('security score') || lowerMessage.includes('assessment')) {
+        return `Your current security score is ${securityManager.calculateOverallScore()}%. Would you like me to show you specific areas for improvement?`;
+    } else if (lowerMessage.includes('fraud') || lowerMessage.includes('scam')) {
         return "If you suspect fraud, immediately contact your bank and report it using our fraud hotlines. Would you like me to show you the reporting numbers?";
     } else if (lowerMessage.includes('password') || lowerMessage.includes('security')) {
         return "Strong passwords should be at least 12 characters with a mix of letters, numbers, and symbols. Enable two-factor authentication for added security.";
@@ -665,8 +1335,10 @@ function getAiResponse(message) {
         return "When using ATMs, always cover your PIN, check for suspicious devices, and use machines in well-lit areas. Report any unusual activity immediately.";
     } else if (lowerMessage.includes('card') || lowerMessage.includes('credit') || lowerMessage.includes('debit')) {
         return "Protect your cards by monitoring statements regularly, using chip readers when available, and reporting lost or stolen cards immediately.";
+    } else if (lowerMessage.includes('improve') || lowerMessage.includes('better')) {
+        return "I can help you improve your security! Try taking our security assessment to get personalized recommendations, or explore our education resources.";
     } else {
-        return "I'm here to help with security questions. You can ask me about fraud prevention, password security, phishing, identity theft protection, ATM safety, or card security.";
+        return "I'm here to help with security questions. You can ask me about fraud prevention, password security, phishing, identity theft protection, ATM safety, card security, or your security score.";
     }
 }
 
@@ -713,5 +1385,6 @@ window.SecurityCenter = {
     switchOtherTab,
     showSafetyTipsModal,
     showCardFraudModal,
-    showAtmDosDontsModal
+    showAtmDosDontsModal,
+    securityManager
 };
