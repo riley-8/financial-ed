@@ -97,7 +97,7 @@
         <section id="ai-advisor" class="content-section active">
             <div class="section-header">
                 <h1>Personal Financial Advisor</h1>
-                <p>Get personalized financial advice powered by AI</p>
+                <p>Get personalized financial advice powered by AI - Type or speak your questions</p>
             </div>
 
             <div class="ai-chat-container">
@@ -115,7 +115,7 @@
                                 <li>Financial education and literacy</li>
                                 <li>Risk assessment and management</li>
                             </ul>
-                            <p>What would you like to discuss today?</p>
+                            <p>What would you like to discuss today? You can type or click the microphone to speak.</p>
                         </div>
                         <div class="message-timestamp">
                             Just now
@@ -124,7 +124,19 @@
                 </div>
                 <div class="chat-input-container">
                     <input type="text" id="chat-input" placeholder="Ask me anything about finance or security...">
+                    <button id="voice-record" class="voice-record-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
                     <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="voice-recording-status" id="voice-status">
+                    <div class="recording-indicator">
+                        <div class="pulse-dot"></div>
+                        <span>Listening... Speak now</span>
+                    </div>
+                    <button id="stop-recording" class="stop-recording-btn">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
                 </div>
                 <div class="quick-actions">
                     <button class="quick-action" data-message="How should I invest R10,000 for medium-term growth?">
@@ -171,10 +183,10 @@
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-book"></i>
+                        <i class="fas fa-microphone"></i>
                     </div>
-                    <h3>Learning Resources</h3>
-                    <p>Access to educational content and interactive learning modules</p>
+                    <h3>Voice Commands</h3>
+                    <p>Speak naturally and get instant AI-powered financial advice</p>
                 </div>
             </div>
         </section>
@@ -195,6 +207,9 @@
             </div>
             <div class="ai-input-container">
                 <input type="text" id="ai-input" placeholder="Ask me anything...">
+                <button id="widget-voice-record" class="voice-record-btn">
+                    <i class="fas fa-microphone"></i>
+                </button>
                 <button id="send-ai-message"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
