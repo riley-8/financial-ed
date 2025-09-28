@@ -20,7 +20,23 @@
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#security" class="nav-link">Security</a>
                 <a href="#contact" class="nav-link">Contact</a>
-                <button class="cta-btn">Get Started</button>
+                
+                <!-- Auth buttons - hidden when logged in -->
+                <div id="auth-buttons">
+                    <a href="/login" class="nav-link" id="login-link">Login</a>
+                    <a href="/signup" class="cta-btn" id="signup-btn">Sign Up</a>
+                </div>
+                
+                <!-- User menu - shown when logged in -->
+                <div id="user-menu" style="display: none;">
+                    <div class="user-profile">
+                        <span id="user-name">John Doe</span>
+                        <div class="user-dropdown">
+                            <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="hamburger" id="hamburger">
                 <span></span>
@@ -47,7 +63,7 @@
                 <div class="hero-buttons">
                     <button class="btn-primary" id="start-learning">
                         <i class="fas fa-rocket"></i>
-                        Start Learning
+                        <span id="start-btn-text">Start Learning</span>
                     </button>
                     <button class="btn-secondary" id="learn-more">
                         <i class="fas fa-play"></i>
@@ -80,7 +96,7 @@
                     <div class="dashboard-content">
                         <div class="metric">
                             <span class="metric-label">Portfolio Value</span>
-                            <span class="metric-value">$24,573</span>
+                            <span class="metric-value">R24,573</span>
                         </div>
                         <div class="chart-container">
                             <div class="chart-bar" style="height: 60%"></div>
@@ -195,7 +211,7 @@
                 <p>Join thousands of learners who are building wealth while staying secure</p>
                 <button class="btn-primary large" id="join-now">
                     <i class="fas fa-arrow-right"></i>
-                    Join FinSecure Today
+                    <span id="cta-text">Join FinSecure Today</span>
                 </button>
             </div>
         </div>
@@ -226,6 +242,192 @@
         </div>
     </footer>
 
-    <script src="../js/landing.js"></script>
+    <style>
+        /* Additional styles for user authentication */
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+            color: #22c55e;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .user-profile:hover .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: #e2e8f0;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        /* Mobile responsive for user menu */
+        @media (max-width: 768px) {
+            .user-dropdown {
+                right: -1rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Check if user is logged in on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            
+            // Hamburger menu functionality
+            const hamburger = document.getElementById('hamburger');
+            const navMenu = document.getElementById('nav-menu');
+            
+            hamburger.addEventListener('click', function() {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Button click handlers
+            document.getElementById('start-learning').addEventListener('click', function() {
+                const user = JSON.parse(localStorage.getItem('finSecureUser') || '{}');
+                if (user.token) {
+                    window.location.href = '/dashboard';
+                } else {
+                    window.location.href = '/signup';
+                }
+            });
+
+            document.getElementById('join-now').addEventListener('click', function() {
+                const user = JSON.parse(localStorage.getItem('finSecureUser') || '{}');
+                if (user.token) {
+                    window.location.href = '/dashboard';
+                } else {
+                    window.location.href = '/signup';
+                }
+            });
+
+            document.getElementById('learn-more').addEventListener('click', function() {
+                // Scroll to features section
+                document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        function checkAuthStatus() {
+            const userData = localStorage.getItem('finSecureUser');
+            const authButtons = document.getElementById('auth-buttons');
+            const userMenu = document.getElementById('user-menu');
+            const userNameSpan = document.getElementById('user-name');
+            const startBtnText = document.getElementById('start-btn-text');
+            const ctaText = document.getElementById('cta-text');
+
+            if (userData) {
+                const user = JSON.parse(userData);
+                
+                // Hide auth buttons, show user menu
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'block';
+                
+                // Update user name
+                userNameSpan.textContent = `${user.firstName} ${user.lastName}`;
+                
+                // Update button texts for logged-in users
+                startBtnText.textContent = 'Go to Dashboard';
+                ctaText.textContent = 'Continue Learning';
+                
+                // Verify token is still valid (optional)
+                verifyToken(user.token);
+            } else {
+                // Show auth buttons, hide user menu
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+                
+                // Reset button texts
+                startBtnText.textContent = 'Start Learning';
+                ctaText.textContent = 'Join FinSecure Today';
+            }
+        }
+
+        async function verifyToken(token) {
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    // Token is invalid, clear storage and reset UI
+                    logout();
+                }
+            } catch (error) {
+                console.error('Token verification failed:', error);
+                // Don't logout on network errors, only on auth failures
+            }
+        }
+
+        function logout() {
+            // Clear user data
+            localStorage.removeItem('finSecureUser');
+            
+            // Reset UI
+            checkAuthStatus();
+            
+            // Optional: Call server logout endpoint
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${JSON.parse(localStorage.getItem('finSecureUser') || '{}').token}`
+                }
+            }).catch(() => {
+                // Ignore errors for logout
+            });
+            
+            // Redirect to home
+            window.location.href = '/';
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

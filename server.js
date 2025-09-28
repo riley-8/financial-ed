@@ -4,6 +4,10 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+
 
 dotenv.config();
 
@@ -14,10 +18,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve static assets (CSS, JS, images) from src/frontend
+// Serve static assets (CSS, JS, images) from src/frontend
 app.use(express.static(path.join(__dirname, "src", "frontend")));
 
-// ✅ Serve all HTML files directly from src/frontend/html
+// Serve all HTML files directly from src/frontend/html
 app.use(express.static(path.join(__dirname, "src", "frontend", "html")));
 
 // Connect to Supabase
@@ -29,6 +33,241 @@ const supabase = createClient(
 // Landing page at root
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "src", "frontend", "html", "landing.html"));
+});
+
+// Dashboard route (protected)
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "src", "frontend", "html", "dashboard.html"));
+});
+
+// Add routes for serving the HTML pages
+app.get("/signup", (req, res) => {
+  res.sendFile(path.join(__dirname, "src", "frontend", "html", "signup.html"));
+});
+
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "src", "frontend", "html", "login.html"));
+});
+
+// Serve market.html
+app.get("/market", (req, res) => {
+    res.sendFile(path.join(__dirname, "src", "frontend", "html", "market.html"));
+});
+
+// Authentication endpoints
+// User signup endpoint
+app.post("/api/auth/signup", async (req, res) => {
+  try {
+    const { firstName, lastName, email, role, password } = req.body;
+
+    // Validation
+    if (!firstName || !lastName || !email || !role || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Valid roles
+    const validRoles = ['student', 'employed', 'unemployed', 'self-employed', 'retired', 'other'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ error: "Invalid employment status" });
+    }
+
+    // Check if user already exists
+    const { data: existingUser, error: checkError } = await supabase
+      .from("users")
+      .select("email")
+      .eq("email", email.toLowerCase())
+      .single();
+
+    if (existingUser) {
+      return res.status(409).json({ error: "An account with this email already exists" });
+    }
+
+    // Hash password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user in Supabase
+    const { data: newUser, error: insertError } = await supabase
+      .from("users")
+      .insert([
+        {
+          id: uuidv4(),
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.toLowerCase().trim(),
+          role: role,
+          password_hash: hashedPassword,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true
+        }
+      ])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Supabase insert error:", insertError);
+      if (insertError.code === '23505') {
+        return res.status(409).json({ error: "An account with this email already exists" });
+      }
+      return res.status(500).json({ error: "Failed to create account. Please try again." });
+    }
+
+    console.log("User created successfully:", { id: newUser.id, email: newUser.email });
+
+    res.status(201).json({
+      message: "Account created successfully",
+      user: {
+        id: newUser.id,
+        firstName: newUser.first_name,
+        lastName: newUser.last_name,
+        email: newUser.email,
+        role: newUser.role
+      }
+    });
+
+  } catch (error) {
+    console.error("Signup error:", error);
+    res.status(500).json({ error: "Internal server error. Please try again later." });
+  }
+});
+
+// User login endpoint
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Find user in Supabase
+    const { data: user, error: selectError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email.toLowerCase().trim())
+      .eq("is_active", true)
+      .single();
+
+    if (selectError || !user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // Verify password
+    const passwordValid = await bcrypt.compare(password, user.password_hash);
+    if (!passwordValid) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET || 'your-fallback-secret-key-change-in-production';
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        role: user.role 
+      },
+      jwtSecret,
+      { expiresIn: '7d' }
+    );
+
+    // Update last login
+    await supabase
+      .from("users")
+      .update({ last_login: new Date().toISOString() })
+      .eq("id", user.id);
+
+    console.log("User logged in successfully:", { id: user.id, email: user.email });
+
+    res.json({
+      message: "Login successful",
+      token: token,
+      user: {
+        id: user.id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Internal server error. Please try again later." });
+  }
+});
+
+// JWT verification middleware (add this for protected routes)
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  const jwtSecret = process.env.JWT_SECRET || 'your-fallback-secret-key-change-in-production';
+  
+  jwt.verify(token, jwtSecret, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.user = user;
+    next();
+  });
+}
+
+// Get user profile endpoint (protected)
+app.get("/api/auth/profile", authenticateToken, async (req, res) => {
+  try {
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id, first_name, last_name, email, role, created_at")
+      .eq("id", req.user.userId)
+      .eq("is_active", true)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        role: user.role,
+        memberSince: user.created_at
+      }
+    });
+
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
+// Logout endpoint (client-side will remove token)
+app.post("/api/auth/logout", authenticateToken, (req, res) => {
+  res.json({ message: "Logged out successfully" });
 });
 
 // API routes
@@ -348,11 +587,6 @@ app.get('/api/market/analytics', (req, res) => {
     res.json(analytics);
 });
 
-// Serve market.html
-app.get("/market", (req, res) => {
-    res.sendFile(path.join(__dirname, "src", "frontend", "html", "market.html"));
-});
-
 // AI Chat endpoint for Gemini integration
 app.post("/api/chat", async (req, res) => {
   try {
@@ -450,7 +684,6 @@ User question: ${message}`;
   }
 });
 
-// URL scanning
 // URL scanning
 app.post("/api/scan/url", async (req, res) => {
   try {
@@ -588,12 +821,10 @@ app.get("/api/users", async (req, res) => {
   res.json(data);
 });
 
-// API 404 handler
+// API 404 handler - MUST BE LAST
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API endpoint not found" });
 });
-
-// ❌ Remove SPA fallback — let Express serve the real .html files instead
 
 // Start server
 const PORT = process.env.PORT || 5000;
