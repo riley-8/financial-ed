@@ -1,6 +1,7 @@
 // frontend/js/landing.js
 class LandingPage {
     constructor() {
+        this.currentTheme = 'dark-mode';
         this.init();
     }
 
@@ -8,6 +9,7 @@ class LandingPage {
         this.setupEventListeners();
         this.setupScrollEffects();
         this.setupAnimations();
+        this.loadThemePreference();
     }
 
     setupEventListeners() {
@@ -19,6 +21,14 @@ class LandingPage {
             hamburger.addEventListener('click', () => {
                 hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
+            });
+        }
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                this.toggleTheme();
             });
         }
 
@@ -78,16 +88,76 @@ class LandingPage {
         });
     }
 
+    toggleTheme() {
+        const body = document.body;
+        const themeIcon = document.querySelector('#theme-toggle i');
+        
+        if (body.classList.contains('dark-mode')) {
+            // Switch to light mode
+            body.classList.replace('dark-mode', 'light-mode');
+            this.currentTheme = 'light-mode';
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+            this.updateNavbarForTheme('light-mode');
+        } else {
+            // Switch to dark mode
+            body.classList.replace('light-mode', 'dark-mode');
+            this.currentTheme = 'dark-mode';
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+            this.updateNavbarForTheme('dark-mode');
+        }
+        
+        // Save preference to localStorage
+        localStorage.setItem('finsecure-theme', this.currentTheme);
+    }
+
+    updateNavbarForTheme(theme) {
+        const navbar = document.querySelector('.navbar');
+        if (theme === 'light-mode') {
+            navbar.style.background = window.scrollY > 100 ? 'rgba(248, 250, 252, 0.98)' : 'rgba(248, 250, 252, 0.95)';
+            navbar.style.boxShadow = window.scrollY > 100 ? '0 2px 20px rgba(0, 0, 0, 0.1)' : 'none';
+        } else {
+            navbar.style.background = window.scrollY > 100 ? 'rgba(15, 20, 25, 0.98)' : 'rgba(15, 20, 25, 0.95)';
+            navbar.style.boxShadow = window.scrollY > 100 ? '0 2px 20px rgba(0, 0, 0, 0.3)' : 'none';
+        }
+    }
+
+    loadThemePreference() {
+        const savedTheme = localStorage.getItem('finsecure-theme') || 'dark-mode';
+        const body = document.body;
+        const themeIcon = document.querySelector('#theme-toggle i');
+        
+        if (savedTheme === 'light-mode') {
+            body.classList.replace('dark-mode', 'light-mode');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            body.classList.replace('light-mode', 'dark-mode');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+        
+        this.currentTheme = savedTheme;
+        this.updateNavbarForTheme(savedTheme);
+    }
+
     setupScrollEffects() {
         // Navbar background on scroll
         window.addEventListener('scroll', () => {
             const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 100) {
-                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            if (this.currentTheme === 'light-mode') {
+                if (window.scrollY > 100) {
+                    navbar.style.background = 'rgba(248, 250, 252, 0.98)';
+                    navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+                } else {
+                    navbar.style.background = 'rgba(248, 250, 252, 0.95)';
+                    navbar.style.boxShadow = 'none';
+                }
             } else {
-                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-                navbar.style.boxShadow = 'none';
+                if (window.scrollY > 100) {
+                    navbar.style.background = 'rgba(15, 20, 25, 0.98)';
+                    navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.3)';
+                } else {
+                    navbar.style.background = 'rgba(15, 20, 25, 0.95)';
+                    navbar.style.boxShadow = 'none';
+                }
             }
 
             // Scroll indicator animation
@@ -183,10 +253,11 @@ const mobileMenuStyles = `
             left: -100%;
             width: 100%;
             height: calc(100vh - 70px);
-            background: white;
+            background: var(--bg-primary);
             flex-direction: column;
             padding: 2rem;
             transition: left 0.3s ease;
+            border-top: 1px solid var(--border-color);
         }
         
         .nav-menu.active {
@@ -197,7 +268,7 @@ const mobileMenuStyles = `
             display: block;
             width: 25px;
             height: 3px;
-            background: #333;
+            background: var(--accent-color);
             margin: 5px 0;
             transition: 0.3s;
         }
@@ -212,6 +283,11 @@ const mobileMenuStyles = `
         
         .hamburger.active span:nth-child(3) {
             transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .theme-toggle {
+            margin: 1rem 0;
+            align-self: center;
         }
     }
 `;
